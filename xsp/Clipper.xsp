@@ -1,0 +1,51 @@
+
+
+%module{Math::Clipper};
+%package{Math::Clipper};
+
+%{
+#include <myinit.h>
+
+IV
+_constant()
+  ALIAS:
+    CT_INTERSECTION = ctIntersection
+    CT_UNION = ctUnion
+    CT_DIFFERENCE = ctDifference
+    CT_XOR = ctXor
+    PT_SUBJECT = ptSubject
+    PT_CLIP = ptClip
+    PFT_EVENODD = pftEvenOdd
+    PFT_NONZERO = pftNonZero
+  CODE:
+    RETVAL = ix;
+  OUTPUT:
+    REVTAL
+
+%}
+
+%name{Math::Clipper}
+class Clipper {
+  Clipper();
+  ~Clipper();
+
+  //bool Execute(TClipType clipType,
+  //  TPolyPolygon &solution,
+  //  TPolyFillType subjFillType = pftEvenOdd,
+  //  TPolyFillType clipFillType = pftEvenOdd);
+  
+
+  %name{get_force_orientation}
+    bool ForceOrientation();
+  %name{set_force_orientation}
+    void ForceOrientation(bool value);
+
+  %name{add_polygon}
+    void AddPolygon(const TPolygon &pg, TPolyType polyType);
+  //void AddPolyPolygon( const TPolyPolygon &ppg, TPolyType polyType);
+  %name{clear}
+    void Clear();
+};
+
+
+

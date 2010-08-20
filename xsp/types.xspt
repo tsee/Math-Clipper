@@ -1,0 +1,28 @@
+
+%typemap{TPolygon};
+%typemap{const TPolygon};
+%typemap{bool}{simple};
+
+%typemap{TPolyType}{parsed}{
+  %cpp_type{TPolyType};
+  %precall_code{%
+    $CVar = (TPolyType)SvUV($PerlVar);
+  %};
+};
+
+%typemap{TClipType}{parsed}{
+  %cpp_type{TClipType};
+  %precall_code{%
+    $CVar = (TClipType)SvUV($PerlVar);
+  %};
+};
+
+
+%typemap{TPolyFillType}{parsed}{
+  %cpp_type{TPolyFillType};
+  %precall_code{%
+    $CVar = (TPolyFillType)SvUV($PerlVar);
+  %};
+};
+
+

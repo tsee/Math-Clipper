@@ -1,0 +1,92 @@
+Clipper*		O_OBJECT
+TPolygon		T_VECTOR_DOUBLEPOINT
+TPolygon*		T_VECTOR_DOUBLEPOINT_PTR
+TPolyType               T_UV
+
+INPUT
+T_VECTOR_DOUBLEPOINT
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVAV) {
+	  AV* av = (AV*)SvRV($arg);
+	  const unsigned int len = av_len(av)+1;
+	  $var = std::vector<TDoublePoint>(len);
+	  SV** elem;
+          AV* innerav;
+	  for (unsigned int i = 0; i < len; i++) {
+	    elem = av_fetch(av, i, 0);
+            if (!SvROK(*elem)
+                || SvTYPE(SvRV(*elem)) != SVt_PVAV
+                || av_len((AV*)SvRV(*elem)) < 1)
+            {
+              Perl_croak(aTHX_ \"%s: %s contains an element that isn't an array reference with at least two elements\",
+                         ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+                         \"$var\");
+            }
+            innerav = (AV*)SvRV(*elem);
+            TDoublePoint& p = ${var}[i];
+	    p.X = SvNV(*av_fetch(innerav, 0, 0));
+	    p.Y = SvNV(*av_fetch(innerav, 1, 0));
+	  }
+	}
+	else
+	  Perl_croak(aTHX_ \"%s: %s is not an array reference\",
+	             ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+	             \"$var\");
+
+T_VECTOR_DOUBLEPOINT_PTR
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVAV) {
+	  AV* av = (AV*)SvRV($arg);
+	  const unsigned int len = av_len(av)+1;
+	  $var = new std::vector<TDoublePoint>(len);
+	  SV** elem;
+          AV* innerav;
+	  for (unsigned int i = 0; i < len; i++) {
+	    elem = av_fetch(av, i, 0);
+            if (!SvROK(*elem)
+                || SvTYPE(SvRV(*elem)) != SVt_PVAV
+                || av_len((AV*)SvRV(*elem)) < 1)
+            {
+              Perl_croak(aTHX_ \"%s: %s contains an element that isn't an array reference with at least two elements\",
+                         ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+                         \"$var\");
+            }
+            innerav = (AV*)SvRV(*elem);
+            TDoublePoint& p = (*${var})[i];
+	    p.X = SvNV(*av_fetch(innerav, 0, 0));
+	    p.Y = SvNV(*av_fetch(innerav, 1, 0));
+	  }
+	}
+	else
+	  Perl_croak(aTHX_ \"%s: %s is not an array reference\",
+	             ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+	             \"$var\");
+
+OUTPUT
+
+T_VECTOR_DOUBLEPOINT
+	AV* av = newAV();
+        AV* innerav;
+	$arg = newRV_noinc((SV*)av);
+	const unsigned int len = $var.size();
+	av_extend(av, len-1);
+	for (unsigned int i = 0; i < len; i++) {
+          innerav = newAV();
+	  av_store(av, i, newRV_noinc((SV*)innerav));
+          av_fill(innerav, 1);
+	  av_store(innerav, 0, newSVnv(${var}[i].X));
+	  av_store(innerav, 1, newSVnv(${var}[i].Y));
+	}
+
+T_VECTOR_DOUBLEPOINT_PTR
+	AV* av = newAV();
+        AV* innerav;
+	$arg = newRV_noinc((SV*)av);
+	const unsigned int len = $var->size();
+	av_extend(av, len-1);
+	for (unsigned int i = 0; i < len; i++) {
+          innerav = newAV();
+	  av_store(av, i, newRV_noinc((SV*)innerav));
+          av_fill(innerav, 1);
+	  av_store(innerav, 0, newSVnv((*${var})[i].X));
+	  av_store(innerav, 1, newSVnv((*${var})[i].Y));
+	}
+
