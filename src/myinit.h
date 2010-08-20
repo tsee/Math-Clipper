@@ -3,6 +3,8 @@
 
 #include "clipper.hpp"
 
+#include "poly2av.h"
+
 using namespace clipper;
 
 #endif

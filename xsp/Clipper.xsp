@@ -6,6 +6,8 @@
 %{
 #include <myinit.h>
 
+PROTOTYPES: DISABLE
+
 IV
 _constant()
   ALIAS:
@@ -19,8 +21,7 @@ _constant()
     PFT_NONZERO = pftNonZero
   CODE:
     RETVAL = ix;
-  OUTPUT:
-    REVTAL
+  OUTPUT: RETVAL
 
 %}
 
@@ -33,7 +34,21 @@ class Clipper {
   //  TPolyPolygon &solution,
   //  TPolyFillType subjFillType = pftEvenOdd,
   //  TPolyFillType clipFillType = pftEvenOdd);
-  
+
+%{
+TPolyPolygon*
+execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
+    Clipper* THIS
+    TClipType clipType
+    TPolyFillType subjFillType
+    TPolyFillType clipFillType
+  CODE:
+    RETVAL = new clipper::TPolyPolygon();
+    THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+  OUTPUT:
+    RETVAL
+    
+%}
 
   %name{get_force_orientation}
     bool ForceOrientation();
