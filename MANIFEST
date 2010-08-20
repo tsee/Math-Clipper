@@ -1,0 +1,13 @@
+Build.PL
+Changes
+lib/Math/Clipper.pm
+MANIFEST			This list of files
+MANIFEST.SKIP
+src/myinit.h
+src/poly2av.h
+src/ppport.h
+t/001compile.t
+t/002basic.t
+xsp/Clipper.xsp
+xsp/my.map
+xsp/types.xspt
