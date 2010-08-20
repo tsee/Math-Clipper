@@ -1,0 +1,17 @@
+Clipper-*.tar.gz
+Makefile
+blib
+pm_to_blib
+*~
+*.tmp
+*.old
+*.bak
+*.rej
+*.swp
+*.swo
+const-*.inc
+buildtmp
+Build
+blib
+_build
+MYMETA.yml
