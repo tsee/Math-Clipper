@@ -3,6 +3,9 @@ Changes
 lib/Math/Clipper.pm
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
+src/clipper.cpp
+src/clipper.hpp
 src/myinit.h
 src/poly2av.h
 src/ppport.h
