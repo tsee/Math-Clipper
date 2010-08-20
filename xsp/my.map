@@ -16,8 +16,10 @@ T_VECTOR_DOUBLEPOINT
 	               ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
 	               \"$var\");
 	  }
-	  else
+	  else {
 	    $var = *tmp;
+            delete tmp;
+          }
 	}
 	else
 	  Perl_croak(aTHX_ \"%s: %s is not an array reference\",
@@ -46,8 +48,10 @@ T_VECTOR_VECTOR_DOUBLEPOINT
 	               ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
 	               \"$var\");
 	  }
-	  else
+	  else {
 	    $var = *tmp;
+            delete tmp;
+          }
 	}
 	else
 	  Perl_croak(aTHX_ \"%s: %s is not an array reference\",
@@ -74,10 +78,12 @@ T_VECTOR_DOUBLEPOINT
 
 T_VECTOR_DOUBLEPOINT_PTR
 	$arg = poly2rvav(aTHX_ *$var);
+        delete $var;
 
 T_VECTOR_VECTOR_DOUBLEPOINT
 	$arg = polypoly2rvav(aTHX_ $var);
 
 T_VECTOR_VECTOR_DOUBLEPOINT_PTR
 	$arg = polypoly2rvav(aTHX_ *$var);
+        delete $var;
 

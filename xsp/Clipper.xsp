@@ -64,21 +64,24 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
 void
 add_subject_polygon(self, poly)
     Clipper* self
-    TPolygon poly
+    TPolygon* poly
   PPCODE:
-    self->AddPolygon(poly, ptSubject);
+    self->AddPolygon(*poly, ptSubject);
+    delete poly;
 
 void
 add_clip_polygon(self, poly)
     Clipper* self
-    TPolygon poly
+    TPolygon* poly
   PPCODE:
-    self->AddPolygon(poly, ptClip);
+    self->AddPolygon(*poly, ptClip);
+    delete poly;
 
 %}
 
   %name{add_poly_polygon}
-    void AddPolyPolygon(const TPolyPolygon &ppg, TPolyType polyType);
+    void AddPolyPolygon(const TPolyPolygon &ppg, TPolyType polyType)
+      %cleanup{% delete ppg; %};
 
   %name{clear}
     void Clear();
