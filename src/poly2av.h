@@ -82,6 +82,7 @@ av2polypoly(pTHX_ AV* theAv)
       return NULL;
     }
     (*retval)[i] = *tmp;
+    delete tmp;
   }
   return retval;
 }

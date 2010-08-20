@@ -30,11 +30,6 @@ class Clipper {
   Clipper();
   ~Clipper();
 
-  //bool Execute(TClipType clipType,
-  //  TPolyPolygon &solution,
-  //  TPolyFillType subjFillType = pftEvenOdd,
-  //  TPolyFillType clipFillType = pftEvenOdd);
-
 %{
 TPolyPolygon*
 execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
@@ -75,6 +70,22 @@ add_clip_polygon(self, poly)
     TPolygon* poly
   PPCODE:
     self->AddPolygon(*poly, ptClip);
+    delete poly;
+
+void
+add_subject_poly_polygon(self, poly)
+    Clipper* self
+    TPolyPolygon* poly
+  PPCODE:
+    self->AddPolyPolygon(*poly, ptSubject);
+    delete poly;
+
+void
+add_clip_poly_polygon(self, poly)
+    Clipper* self
+    TPolyPolygon* poly
+  PPCODE:
+    self->AddPolyPolygon(*poly, ptClip);
     delete poly;
 
 %}
