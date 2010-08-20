@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1+8+3;
+use Test::More tests => 1+6+3;
 
 use constant EPS => 1.e-9;
 sub approx_eq {
@@ -14,7 +14,7 @@ pass();
 
 foreach my $const (
     qw/CT_INTERSECTION CT_UNION CT_DIFFERENCE CT_XOR/,
-    qw/PT_SUBJECT PT_CLIP/,
+    #qw/PT_SUBJECT PT_CLIP/,
     qw/PFT_EVENODD PFT_NONZERO/,
     )
 {
@@ -23,24 +23,22 @@ foreach my $const (
 
 my $c = Math::Clipper->new;
 isa_ok($c, 'Math::Clipper');
-$c->add_polygon(
+$c->add_subject_polygon(
   [
     [0., 0.],
     [1., 0.],
     [1., 1.],
     [0., 1.],
   ],
-  PT_SUBJECT
 );
 
-$c->add_polygon(
+$c->add_clip_polygon(
   [
     [0., 0.],
     [0.5, 0.],
     [0.5, 1.],
     [0., 1.],
   ],
-  PT_CLIP
 );
 
 my $ppoly = $c->execute(CT_INTERSECTION);

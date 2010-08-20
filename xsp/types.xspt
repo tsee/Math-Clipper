@@ -1,6 +1,8 @@
 
 %typemap{TPolygon};
 %typemap{const TPolygon};
+%typemap{TPolyPolygon};
+%typemap{const TPolyPolygon};
 %typemap{bool}{simple};
 
 %typemap{TPolyType}{parsed}{

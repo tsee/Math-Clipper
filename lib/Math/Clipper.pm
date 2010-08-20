@@ -15,9 +15,8 @@ XSLoader::load('Math::Clipper', $VERSION);
 # TODO: keep in sync with docs below and xsp/Clipper.xsp
 
 our %EXPORT_TAGS = (
-# socket types
     cliptypes     => [qw/CT_INTERSECTION CT_UNION CT_DIFFERENCE CT_XOR/],
-    polytypes     => [qw/PT_SUBJECT PT_CLIP/],
+    #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO/],
 );
 
@@ -31,10 +30,28 @@ __END__
 
 =head1 NAME
 
-Math::Clipper - Polygon intersections in 2D
+Math::Clipper - Polygon clipping in 2D
 
 =head1 SYNOPSIS
 
+  use Math::Clipper ':all';
+  my $clipper = Math::Clipper->new;
+  
+  # Add the polygon to-be-clipped
+  $clipper->add_subject_polygon(
+    [ [$x1, $y1],
+      [$x2, $y2],
+      ...
+    ],
+  );
+
+  # Add the polygon that defines the clipping
+  $clipper->add_clip_polygon(
+    [ [$x1, $y1],
+      [$x2, $y2],
+      ...
+    ],
+  );
 =head1 DESCRIPTION
 
 =head1 SEE ALSO

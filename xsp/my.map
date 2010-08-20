@@ -10,7 +10,7 @@ TPolyPolygon*		T_VECTOR_VECTOR_DOUBLEPOINT_PTR
 INPUT
 T_VECTOR_DOUBLEPOINT
 	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVAV) {
-	  ($type)* tmp = av2poly(aTHX_ (AV*)SvRV($arg));
+	  $type* tmp = av2poly(aTHX_ (AV*)SvRV($arg));
 	  if (tmp == NULL) {
 	    Perl_croak(aTHX_ \"%s: %s is not an array reference or contains invalid data\",
 	               ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
@@ -40,7 +40,7 @@ T_VECTOR_DOUBLEPOINT_PTR
 
 T_VECTOR_VECTOR_DOUBLEPOINT
 	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVAV) {
-	  ($type)* tmp = av2polypoly(aTHX_ (AV*)SvRV($arg));
+	  $type* tmp = av2polypoly(aTHX_ (AV*)SvRV($arg));
 	  if (tmp == NULL) {
 	    Perl_croak(aTHX_ \"%s: %s is not an array reference or contains invalid data\",
 	               ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
@@ -80,3 +80,4 @@ T_VECTOR_VECTOR_DOUBLEPOINT
 
 T_VECTOR_VECTOR_DOUBLEPOINT_PTR
 	$arg = polypoly2rvav(aTHX_ *$var);
+

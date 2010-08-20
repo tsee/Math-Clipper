@@ -55,9 +55,31 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
   %name{set_force_orientation}
     void ForceOrientation(bool value);
 
-  %name{add_polygon}
-    void AddPolygon(const TPolygon &pg, TPolyType polyType);
-  //void AddPolyPolygon( const TPolyPolygon &ppg, TPolyType polyType);
+// We don't expose this since we save the TPolyType stuff entirely that way!
+//  %name{add_polygon}
+//    void AddPolygon(const TPolygon &pg, TPolyType polyType);
+
+%{
+
+void
+add_subject_polygon(self, poly)
+    Clipper* self
+    TPolygon poly
+  PPCODE:
+    self->AddPolygon(poly, ptSubject);
+
+void
+add_clip_polygon(self, poly)
+    Clipper* self
+    TPolygon poly
+  PPCODE:
+    self->AddPolygon(poly, ptClip);
+
+%}
+
+  %name{add_poly_polygon}
+    void AddPolyPolygon(const TPolyPolygon &ppg, TPolyType polyType);
+
   %name{clear}
     void Clear();
 };
