@@ -16,3 +16,4 @@ blib
 _build
 MYMETA.yml
 *.o
+META.yml
