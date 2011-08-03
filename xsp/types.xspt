@@ -1,29 +1,33 @@
-
-%typemap{TPolygon};
-%typemap{const TPolygon};
-%typemap{TPolyPolygon};
-%typemap{const TPolyPolygon};
 %typemap{bool}{simple};
 
-%typemap{TPolyType}{parsed}{
-  %cpp_type{TPolyType};
+%typemap{Polygon};
+%typemap{const Polygon};
+%typemap{Polygons};
+%typemap{const Polygons};
+%typemap{ExPolygon};
+%typemap{const ExPolygon};
+%typemap{ExPolygons};
+%typemap{const ExPolygons};
+
+%typemap{PolyType}{parsed}{
+  %cpp_type{PolyType};
   %precall_code{%
-    $CVar = (TPolyType)SvUV($PerlVar);
+    $CVar = (PolyType)SvUV($PerlVar);
   %};
 };
 
-%typemap{TClipType}{parsed}{
-  %cpp_type{TClipType};
+%typemap{ClipType}{parsed}{
+  %cpp_type{ClipType};
   %precall_code{%
-    $CVar = (TClipType)SvUV($PerlVar);
+    $CVar = (ClipType)SvUV($PerlVar);
   %};
 };
 
 
-%typemap{TPolyFillType}{parsed}{
-  %cpp_type{TPolyFillType};
+%typemap{PolyFillType}{parsed}{
+  %cpp_type{PolyFillType};
   %precall_code{%
-    $CVar = (TPolyFillType)SvUV($PerlVar);
+    $CVar = (PolyFillType)SvUV($PerlVar);
   %};
 };
 
