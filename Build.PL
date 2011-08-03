@@ -7,7 +7,7 @@ my $build = Module::Build::WithXSpp->new(
   license         => 'perl',
   # Provides extra C typemaps that are auto-merged
   extra_typemap_modules => {
-    'ExtUtils::Typemap::Default' => '0.05',
+    'ExtUtils::Typemaps::Default' => '0.05',
   },
 );
 
