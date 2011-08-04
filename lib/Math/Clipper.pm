@@ -176,7 +176,8 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 The Perl module was written by:
 
-Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
+Steffen Mueller (E<lt>smueller@cpan.orgE<gt>) and
+Mike Sheldrake
 
 But the underlying library C<Clipper> was written by
 Angus Johnson. Check the SourceForge project page for
@@ -186,7 +187,10 @@ contact information.
 
 The C<Math::Clipper> module is
 
-Copyright (C) 2010 by Steffen Mueller
+Copyright (C) 2010, 2011 by Steffen Mueller
+
+Copyright (C) 2011 by Mike Sheldrake
+
 
 but we are shipping a copy of the C<Clipper> C++ library, which
 is
