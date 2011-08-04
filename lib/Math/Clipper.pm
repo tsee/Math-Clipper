@@ -6,7 +6,7 @@ use warnings;
 use Carp 'croak';
 
 use Exporter();
-our $VERSION = '0.01';
+our $VERSION = '1.00';
 our @ISA = qw(Exporter);
 
 require XSLoader;
