@@ -1,4 +1,11 @@
 Revision history for Perl extension Math::Clipper.
 
+1.00  ... 2011
+  * WARNING * Incompatible changes!
+  - Upgraded the Clipper library to the newest available version 4.3.0.
+  - Clipper 4.3.0 has various interface changes, see the documentation
+    for details. Most importantly, the coordinates are now 64bit
+    integers instead of floating point numbers.
+
 0.01  Thu Aug 19 19:00 2010
   - original version
