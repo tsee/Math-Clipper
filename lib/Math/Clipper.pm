@@ -150,22 +150,6 @@ used.
 For reuse of a C<Math::Clipper> object, you can call the
 C<clear> method to remove all stashed polygons.
 
-=head2 set_force_orientation
-
-Quoting the C<Clipper> documentation:
-
-  The ForceOrientation property is only useful when operating on simple
-  polygons. It ensures that the simple polygons that result from a
-  TClipper.Execute() calls will have clockwise 'outer' and counter-clockwise
-  'inner' (or 'hole') polygons. If ForceOrientation == false, then the
-  polygons returned in the solution will have undefined orientation.<br>
-  The only disadvantage in setting ForceOrientation = true is it will result
-  in a very minor penalty (~10%) in execution speed. (Default == true)
-
-=head2 get_force_orientation
-
-Returns the state of the C<ForceOrientation> property.
-
 =head1 SEE ALSO
 
 The SourceForge project page of Clipper:
