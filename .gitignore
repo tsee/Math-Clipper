@@ -12,6 +12,7 @@ pm_to_blib
 const-*.inc
 buildtmp
 Build
+Build.bat
 blib
 _build
 MYMETA.yml
