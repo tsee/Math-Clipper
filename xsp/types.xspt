@@ -1,13 +1,13 @@
 %typemap{bool}{simple};
 
-%typemap{Polygon};
-%typemap{const Polygon};
-%typemap{Polygons};
-%typemap{const Polygons};
-%typemap{ExPolygon};
-%typemap{const ExPolygon};
-%typemap{ExPolygons};
-%typemap{const ExPolygons};
+%typemap{clipper::Polygon};
+%typemap{const clipper::Polygon};
+%typemap{clipper::Polygons};
+%typemap{const clipper::Polygons};
+%typemap{clipper::ExPolygon};
+%typemap{const clipper::ExPolygon};
+%typemap{clipper::ExPolygons};
+%typemap{const clipper::ExPolygons};
 
 %typemap{PolyType}{parsed}{
   %cpp_type{PolyType};

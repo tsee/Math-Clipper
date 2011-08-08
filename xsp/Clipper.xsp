@@ -31,7 +31,7 @@ class Clipper {
   ~Clipper();
 
 %{
-Polygons*
+clipper::Polygons*
 execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     Clipper* THIS
     ClipType clipType
@@ -60,7 +60,7 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
 void
 add_subject_polygon(self, poly)
     Clipper* self
-    Polygon* poly
+    clipper::Polygon* poly
   PPCODE:
     self->AddPolygon(*poly, ptSubject);
     delete poly;
@@ -68,7 +68,7 @@ add_subject_polygon(self, poly)
 void
 add_clip_polygon(self, poly)
     Clipper* self
-    Polygon* poly
+    clipper::Polygon* poly
   PPCODE:
     self->AddPolygon(*poly, ptClip);
     delete poly;
@@ -76,7 +76,7 @@ add_clip_polygon(self, poly)
 void
 add_subject_polygons(self, polys)
     Clipper* self
-    Polygons* polys
+    clipper::Polygons* polys
   PPCODE:
     self->AddPolygons(*polys, ptSubject);
     delete polys;
@@ -84,7 +84,7 @@ add_subject_polygons(self, polys)
 void
 add_clip_polygons(self, polys)
     Clipper* self
-    Polygons* polys
+    clipper::Polygons* polys
   PPCODE:
     self->AddPolygons(*polys, ptClip);
     delete polys;
@@ -92,7 +92,7 @@ add_clip_polygons(self, polys)
 bool
 is_clockwise(classname, polygon, UseFullInt64Range = 1)
     const char* classname
-    Polygon* polygon
+    clipper::Polygon* polygon
     bool UseFullInt64Range
   CODE:
     RETVAL = clipper::IsClockwise(*polygon, UseFullInt64Range);
@@ -101,7 +101,7 @@ is_clockwise(classname, polygon, UseFullInt64Range = 1)
 double
 area(classname, polygon, UseFullInt64Range = 1)
     const char* classname
-    Polygon* polygon
+    clipper::Polygon* polygon
     bool UseFullInt64Range
   CODE:
     RETVAL = clipper::Area(*polygon, UseFullInt64Range);

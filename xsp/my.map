@@ -4,14 +4,14 @@ PolyType		T_UV
 ClipType		T_UV
 PolyFillType		T_UV
 
-Polygon			T_VECTOR_POINT
-Polygon*		T_VECTOR_POINT_PTR
-Polygons		T_VECTOR_VECTOR_POINT
-Polygons*		T_VECTOR_VECTOR_POINT_PTR
-ExPolygon		T_EXPOLY
-ExPolygon*		T_EXPOLY_PTR
-ExPolygons		T_VECTOR_EXPOLY
-ExPolygons*		T_VECTOR_EXPOLY_PTR
+clipper::Polygon			T_VECTOR_POINT
+clipper::Polygon*		T_VECTOR_POINT_PTR
+clipper::Polygons		T_VECTOR_VECTOR_POINT
+clipper::Polygons*		T_VECTOR_VECTOR_POINT_PTR
+clipper::ExPolygon		T_EXPOLY
+clipper::ExPolygon*		T_EXPOLY_PTR
+clipper::ExPolygons		T_VECTOR_EXPOLY
+clipper::ExPolygons*		T_VECTOR_EXPOLY_PTR
 
 INPUT
 T_VECTOR_POINT
