@@ -80,8 +80,19 @@ perl2polygon(pTHX_ AV* theAv)
     }
     innerav = (AV*)SvRV(*elem);
     clipper::IntPoint& p = (*retval)[i];
+    // IVSIZE is from perl/lib/CORE/config.h, defined as sizeof(IV)
+#if IVSIZE >= 8
+    // if Perl integers are 64 bit, use SvIV()
+    // Clipper.pm then supports 64 bit ints.
     p.X = (clipper::long64)SvIV(*av_fetch(innerav, 0, 0));
     p.Y = (clipper::long64)SvIV(*av_fetch(innerav, 1, 0));
+#else
+    // otherwise coerce the Perl scalar to a double, with SvNV()
+    // Perl doubles commonly allow 53 bits for the mantissa.
+    // So in the common case, Clipper.pm supports 53 bit integers, stored in doubles on the Perl side.
+    p.X = (clipper::long64)SvNV(*av_fetch(innerav, 0, 0));
+    p.Y = (clipper::long64)SvNV(*av_fetch(innerav, 1, 0));
+#endif
   }
   return retval;
 }
