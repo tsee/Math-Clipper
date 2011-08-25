@@ -110,6 +110,15 @@ area(classname, polygon, UseFullInt64Range = 1)
     RETVAL = clipper::Area(*polygon, UseFullInt64Range);
   OUTPUT: RETVAL
 
+clipper::Polygons*
+offset(polygons, delta)
+    clipper::Polygons* polygons
+    const float delta
+  CODE:
+    RETVAL = new clipper::Polygons();
+    clipper::OffsetPolygons(*polygons, *RETVAL, delta);
+  OUTPUT:
+    RETVAL
 %}
 
   %name{clear}
