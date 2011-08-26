@@ -114,8 +114,7 @@ is_counter_clockwise(polygon, UseFullInt64Range = 1)
   OUTPUT: RETVAL
 
 double
-area(classname, polygon, UseFullInt64Range = 1)
-    const char* classname
+area(polygon, UseFullInt64Range = 1)
     clipper::Polygon* polygon
     bool UseFullInt64Range
   CODE:
