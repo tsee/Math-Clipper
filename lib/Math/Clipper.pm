@@ -142,7 +142,7 @@ Math::Clipper - Polygon clipping in 2D
 
 =head1 SYNOPSIS
 
- use Clipper ':all';
+ use Math::Clipper ':all';
 
  my $clipper = Math::Clipper->new;
 
@@ -167,8 +167,8 @@ Math::Clipper - Polygon clipping in 2D
               ];
  my $poly_2 = [
                [-0.001, -0.001],
-               [0.001, -0.001]
-               [0, 0.002],
+               [0.001, -0.001],
+               [0, 0.002]
               ];
 
  # But we can have them automatically scaled up (in place) to a safe 32 bit integer range
