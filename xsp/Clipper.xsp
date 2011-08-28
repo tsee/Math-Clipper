@@ -101,9 +101,11 @@ add_clip_polygons(self, polys)
     self->AddPolygons(*polys, ptClip);
     delete polys;
 
-/* In Clipper 4.3.0, IsClockwise() is misnamed - gives opposite results. */
-/* Author is reluctant to fix it. */
-/* But double check that when updating this module or the Clipper library. */
+%}
+// In Clipper 4.3.0, IsClockwise() is misnamed - gives opposite results.
+// Author is reluctant to fix it.
+// But double check that when updating this module or the Clipper library.
+%{
 
 double
 is_counter_clockwise(polygon, UseFullInt64Range = 1)
