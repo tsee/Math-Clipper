@@ -11,6 +11,13 @@ src/poly2av.h
 src/ppport.h
 t/001compile.t
 t/002basic.t
+t/003boolops.t
+t/004filltype.t
+t/005offset.t
+t/006winding.t
+t/007usefullrange.t
+t/008integerize.t
+t/009expolygon.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
