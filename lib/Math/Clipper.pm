@@ -41,6 +41,16 @@ my %intspecs = (
             },
     );
 
+sub offset {
+	my $polygons = shift;
+	my $delta = shift;
+	my $scale = @_ ? shift:100;
+	my $scalevec=[$scale,$scale];
+	my $polyscopy=[(map {[(map {[(map {$_*=$scalevec->[0]} @{$_})]} @{$_})]} @{$polygons})];
+	my $ret = _offset($polyscopy,$delta*$scale);
+	unscale_coordinate_sets($scalevec , $ret);
+	return $ret;
+	}
 
 sub unscale_coordinate_sets { # to undo what integerize_coordinate_sets() does
     my $scale_vector=shift;
@@ -61,6 +71,7 @@ sub integerize_coordinate_sets {
     if (ref($_[0]) =~ /HASH/) {%opts=%{(shift)};}
     $opts{constrain} =  1 if !defined($opts{constrain});
     $opts{bits}      = ((defined($Config{use64bitint}) && $Config{use64bitint} eq "define") || $Config{longsize} >= 8 ? 64 : 53 ) if !defined($opts{bits});
+    $opts{margin} =  0 if !defined($opts{margin});
 
     # assume all coordinate vectors (points) have same number of coordinates; get that count from first one
     my $coord_count=scalar(@{$_[0]->[0]});
@@ -78,9 +89,9 @@ sub integerize_coordinate_sets {
             # for each "point"
             foreach my $vector (@{$set}) {
                 # looking for the maximum magnitude
-                if ($maxc<abs($vector->[$ci])) {$maxc=abs($vector->[$ci]);}
+                if ($maxc<abs($vector->[$ci]) + $opts{margin}) {$maxc=abs($vector->[$ci]) + $opts{margin};}
                 # looking for the maximum exponent, when coords are in scientific notation
-                if (sprintf("%.20e",$vector->[$ci]) =~ /[eE]([+-])0*(\d+)$/) {
+                if (sprintf("%.20e",$vector->[$ci] + ($vector->[$ci]<0?-1:1)*$opts{margin}) =~ /[eE]([+-])0*(\d+)$/) {
                     my $exp1 = eval($1.$2);
                     if ($vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1} 
                     }
@@ -372,7 +383,7 @@ If the first argument is not a hash reference, it is taken instead as the first 
 
     my $scale_vector = integerize_coordinate_sets( {
                                                     constrain => 0, # don't do uniform scaling
-                                                    bits => 32      # use the +/- 1,500,000,000 integer range
+                                                    bits => 32     # use the +/- 1,500,000,000 integer range
                                                     },
                                                     $poly1 , $poly2 , $poly3
                                                  );
@@ -403,28 +414,44 @@ the polygons to "unscale". The polygon coordinates will be updated in place.
 
 =head2 offset
 
-Takes a reference to an array of polygons, and a positive or negative offset dimension.
-Returns a new set of polygons, offset by the given dimension.
+Takes a reference to an array of polygons, a positive or negative offset dimension, and, optionally, a scaling factor.
+
+The polygons will use the NONZERO fill strategy, so filled areas and holes can be specified by polygon winding order. 
 
 A positive offset dimension makes filled polygons grow outward, and their holes shrink.
 A negative offset makes polygons shrink and their holes grow.
 
+Coordinates will be multiplied by the scaling factor before the offset operation and the results divided by the scaling factor.
+The default scaling factor is 100. Setting the scaling factor higher will result in more points and smoother contours in the offset results.
+
+Returns a new set of polygons, offset by the given dimension.
+
+    my $offset_polygons = offset($polygon, 5.5); # offset by 5.5
+        or
+    my $offset_polygons = offset($polygon, 5.5, 1000); # smoother results, proliferation of points
+
+B<WARNING: >As you increase the scaling factor, the number of points grows quickly, and will happily consume all of your RAM.
+Large offset dimensions also contribute to a proliferation of points.
+
+Floating point data in the input is acceptable - in that case, the scaling factor also 
+determines how many decimal digits you'll get in the results. It is not necessary,
+and generally not desirable to use C<integerize_coordinate_sets> to prepare data for this function.
+
 When doing negative offsets, you may find the winding order of the results to be the opposite 
 of what you expect. Check it and change it if winding order is important in your application.
-
-    $offset_polygon = offset($polygons, $delta);
 
 =head2 area
 
 Returns the signed area of a single polygon.
 A counter clockwise wound polygon area will be positive.
 A clockwise wound polygon area will be negative.
+Coordinate data should be integers.
 
     $area = area($polygon);
 
 =head2 is_counter_clockwise
 
-Determine if a polygon is wound counter clockwise. Returns true if it is, false if it isn't.
+Determine if a polygon is wound counter clockwise. Returns true if it is, false if it isn't. Coordinate data should be integers.
 
     $poly = [ [0, 0] , [2, 0] , [1, 1] ]; # a counter clockwise wound polygon
     $direction = is_counter_clockwise($poly);

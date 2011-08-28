@@ -124,7 +124,7 @@ area(polygon, UseFullInt64Range = 1)
   OUTPUT: RETVAL
 
 clipper::Polygons*
-offset(polygons, delta)
+_offset(polygons, delta)
     clipper::Polygons* polygons
     const float delta
   CODE:
