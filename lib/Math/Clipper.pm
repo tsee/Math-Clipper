@@ -4,6 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 use Carp 'croak';
+use Config;
 
 use Exporter();
 our $VERSION = '1.00';
@@ -18,12 +19,119 @@ our %EXPORT_TAGS = (
     cliptypes     => [qw/CT_INTERSECTION CT_UNION CT_DIFFERENCE CT_XOR/],
     #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO/],
+    utilities => [qw/area offset is_counter_clockwise integerize_coordinate_sets unscale_coordinate_sets/],
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
 
+my %intspecs = (
+    '64' => {
+            maxint    => 9223372036854775807,   # or 9223372036854775808, but close enough - signed 64 bit integer max
+            maxdigits => 19
+            },
+    '53' => {
+            maxint    => 9007199254740992, # signed 53 bit integer max, for integers stored in double precision floats
+            maxdigits => 16
+            },
+    '32' => {
+            maxint    => 1500000000,   # Clipper-imposed max when 64 bit integer math not enabled
+            maxdigits => 10
+            },
+    );
+
+
+sub unscale_coordinate_sets { # to undo what integerize_coordinate_sets() does
+    my $scale_vector=shift;
+    my $coord_sets=shift;
+    my $coord_count=scalar(@{$coord_sets->[0]->[0]});
+    if (!ref($scale_vector)) {$scale_vector=[(map {$scale_vector} (0..$coord_count-1))];}
+    foreach my $set (@{$coord_sets}) {
+        foreach my $vector (@{$set}) {
+            for (my $ci=0;$ci<$coord_count;$ci++) {
+                $vector->[$ci] /= $scale_vector->[$ci] if $scale_vector->[$ci]; # avoid divide by zero
+                }
+            }
+        }
+    }
+
+sub integerize_coordinate_sets {
+    my %opts=();
+    if (ref($_[0]) =~ /HASH/) {%opts=%{(shift)};}
+    $opts{constrain} =  1 if !defined($opts{constrain});
+    $opts{bits}      = ((defined($Config{use64bitint}) && $Config{use64bitint} eq "define") || $Config{longsize} >= 8 ? 64 : 53 ) if !defined($opts{bits});
+
+    # assume all coordinate vectors (points) have same number of coordinates; get that count from first one
+    my $coord_count=scalar(@{$_[0]->[0]});
+
+    # return this with scaled data, so user can "unscale" Clipper results
+    my @scale_vector;
+    
+    # deal with each coordinate "column" (eg. x column, y column, ... possibly more)
+    for (my $ci=0;$ci<$coord_count;$ci++) {
+        my $maxc=$_[0]->[0]->[$ci];
+        my $max_exp;
+
+        # go through all the coordinate sets, looking just at the current column
+        foreach my $set (@_) {
+            # for each "point"
+            foreach my $vector (@{$set}) {
+                # looking for the maximum magnitude
+                if ($maxc<abs($vector->[$ci])) {$maxc=abs($vector->[$ci]);}
+                # looking for the maximum exponent, when coords are in scientific notation
+                if (sprintf("%.20e",$vector->[$ci]) =~ /[eE]([+-])0*(\d+)$/) {
+                    my $exp1 = eval($1.$2);
+                    if ($vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1} 
+                    }
+                else {croak "some coordinate didn't look like a number: ",$vector->[$ci]}
+                }
+            }
+
+        # Set scale for this coordinate column to the largest value that will convert the
+        # larges coordinate in the set to near the top of the available integer range.
+        # There's never any question of how much precision the user wants -
+        # we just always give as much as possible, within the integer limit in effect (53 bit or 64 bit)
+
+        $scale_vector[$ci]=10**(-$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 1));
+
+        if ($maxc * $scale_vector[$ci] > $intspecs{$opts{bits}}->{maxint}) {
+            # Both 53 bit and 64 bit integers
+            # have max values near 9*10**(16 or 19).
+            # So usually you have 16 or 19 digits to use. 
+            # But if your scaled-up max values enter the
+            # zone just beyond the integer max, we'll only
+            # scale up to 15 or 18 digit integers instead.
+
+            $scale_vector[$ci]=10**(-$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 2));
+
+            }
+        }
+    
+    # By default, scaling is independent for each
+    # coordinate column - all the Xs get one scale
+    # all the Ys something else - to take the greatest
+    # advantage of the available integer domain.
+    # But if the "constrain" option is set true, we use
+    # the minimum scale from all the coordinate columns.
+    # The minimum scale is the one that will work
+    # for all columns, without overflowing our integer limits.
+    if ($opts{constrain}) {
+        my $min_scale=(sort {$a<=>$b} @scale_vector)[0];
+        @scale_vector = map {$min_scale} @scale_vector;
+        }
+
+    # Scale the original data
+    foreach my $set (@_) {
+        foreach my $vector (@{$set}) {
+            for (my $ci=0;$ci<$coord_count;$ci++) {
+                $vector->[$ci] *= $scale_vector[$ci];
+                }
+            }
+        }
+
+    return \@scale_vector;
+    }
 
 1;
 __END__
@@ -34,31 +142,54 @@ Math::Clipper - Polygon clipping in 2D
 
 =head1 SYNOPSIS
 
-  use Math::Clipper ':all';
-  my $clipper = Math::Clipper->new;
-  
-  # Add the polygon to-be-clipped
-  $clipper->add_subject_polygon(
-    [ [$x1, $y1],
-      [$x2, $y2],
-      ...
-    ],
-  );
+ use Clipper ':all';
 
-  # Add the polygon that defines the clipping
-  $clipper->add_clip_polygon(
-    [ [$x1, $y1],
-      [$x2, $y2],
-      ...
-    ],
-  );
-  
-  # Run the clipping operation
-  my $result = $clipper->execute(CT_INTERSECTION);
-  # $result is array ref containing 0 or more
-  # polygons (themselves array refs as above) that represent
-  # the intersection between the subject and the clipping
-  # polygon(s)
+ my $clipper = Math::Clipper->new;
+
+ $clipper->add_subject_polygon( [ [-100,  100], [  0, -200], [100, 100] ] );
+ $clipper->add_clip_polygon(    [ [-100, -100], [100, -100], [  0, 200] ] );
+ my $result = $clipper->execute(CT_DIFFERENCE);
+ # $result is now a reference to an array of three triangles
+
+ $clipper->clear();
+ # all data from previous operation cleared
+ # object ready for reuse
+
+
+ # Example with floating point coordinates:
+ # Clipper requires integer input. 
+ # These polygons won't work.
+
+ my $poly_1 = [
+               [-0.001, 0.001],
+               [0, -0.002],
+               [0.001, 0.001]
+              ];
+ my $poly_2 = [
+               [-0.001, -0.001],
+               [0.001, -0.001]
+               [0, 0.002],
+              ];
+
+ # But we can have them automatically scaled up (in place) to a safe 32 bit integer range
+
+ my $scale = integerize_coordinate_sets( $poly_1 , $poly_2 );
+ $clipper->add_subject_polygon( $poly_1 );
+ $clipper->add_clip_polygon(    $poly_2 );
+ my $result = $clipper->execute(CT_DIFFERENCE);
+ # to convert the results (in place) back to the original scale:
+ unscale_coordinate_sets( $scale, $result );
+
+ # Example using 32 bit integer math instead of 53 or 64
+ # (less precision, a bit faster)
+ my $clipper32 = Math::Clipper->new;
+ $clipper32->use_full_coordinate_range(0);
+ my $scale32 = integerize_coordinate_sets( { bits=>32 } , $poly_1 , $poly_2 );
+ $clipper32->add_subject_polygon( $poly_1 );
+ $clipper32->add_clip_polygon(    $poly_2 );
+ my $result32 = $clipper->execute(CT_DIFFERENCE);
+ unscale_coordinate_sets( $scale32, $result32 );
+
 
 =head1 DESCRIPTION
 
@@ -68,7 +199,7 @@ polygon clipping.
 =head2 Exports
 
 The module optionally exports a few constants to your
-namespace. Standard L<Exporter> semantics apply
+namespace. Standard L<Exporter|Exporter> semantics apply
 (including the C<:all> tag).
 
 The list of exportable constants is comprised of
@@ -87,21 +218,53 @@ during the clipping operation:
 
 =head1 CONVENTIONS
 
-When the documentation refers to a I<polygon>, this
-technically means a reference to an array of points
-in 2D space. Such points are, in turn,
-represented by an array (reference) containing two
-numbers: The I<X> and I<Y> coordinates. An example
-of this would be for a 1x1 square:
+I<INTEGERS>: Clipper 4.x works with polygons with integer coordinates.
+Data in floating point format will need to be scaled appropriately
+to be converted to the available integer range before polygons are
+added to a clipper object. (Scaling utilities are provided here.)
+
+A I<Polygon> is represented by a reference to an array of 2D points.
+A I<Point> is, in turn, represented by a reference to an array containing two
+numbers: The I<X> and I<Y> coordinates. A 1x1 square polygon example:
 
   [ [0, 0],
     [1, 0],
     [1, 1],
     [0, 1] ]
 
-Furthermore, a poly-polygon (which is the name that C<Clipper>
-uses) is a set of polygons, represented (again) by an array
-(reference) containing 0 or more polygons.
+Sets of polygons, as returned by the C<execute> method, 
+are represented by an array reference containing 0 or more polygons.
+
+Clipper also has a polygon type that explicitly associates an outer polygon with
+any additional polygons that describe "holes" in the filled region of the
+outer polygon. This is called an I<ExPolygon>. The data structure for 
+an I<ExPolygon> is as follows,:
+
+  { outer => [ <polygon> ],
+    holes => [ 
+               [ <polygon> ],
+               [ <polygon> ],
+               ...
+             ]
+  
+  }
+
+The "fill type" of a polygon refers to the strategy used to determine
+which side of a polygon is the inside, and whether a polygon represents
+a filled region, or a hole. You may optionally specify the fill type of
+your subject and clip polygons when you call the C<execute> method.
+
+When you specify the NONZERO fill type, the winding order of
+polygon points determines whether a polygon is filled, or represents a hole.
+Clipper uses the convention that counter clockwise wound polygons 
+are filled, while clockwise wound polygons represent holes. This
+strategy is more explicit, but requires that you manage winding order of all polygons.
+
+The EVENODD fill type strategy uses a test segment, with it's start point inside a polygon,
+and it's end point out beyond the bounding box of all polygons in question. All intersections 
+between the segment and all polygons are calculated. If the intersection
+count is odd, the inner-most (if nested) polygon containing the segment's start point is considered to be
+filled. When the intersection count is even, that polygon is considered to be a hole.
 
 =head1 METHODS
 
@@ -109,6 +272,27 @@ uses) is a set of polygons, represented (again) by an array
 
 Constructor that takes no arguments returns a new
 C<Math::Clipper> object.
+
+=head2 use_full_coordinate_range
+
+Clipper uses either 32 bit or 64 bit integers internally. As of version 4.3.0, 64 bit integer math is used by default.
+
+Pass true to C<use_full_coordinate_range> to tell Clipper to use 64 bit math internally. 
+Pass false to tell Clipper to use 32 bit math.
+
+    $clipper->use_full_coordinate_range(0); # use 32 bit math
+
+A typical Perl that supports 32 bit integers, can alternatively store 53 bit integers as floating point 
+numbers. Some Perls are built to support 64 bit integers directly. To use the full range of either 53 
+bit or 64 bit integers, pass "true" to the  C<use_full_coordinate_range> method.
+
+    $clipper->use_full_coordinate_range(1); # default for Clipper 4.3.0
+
+This will cost you a bit of time ( perhaps 15% more) but will give you the full signed integer range for your coordinates. For 64 bit, that's +/-9,223,372,036,854,775,807. For 53 bit it's +/-9,007,199,254,740,992.
+
+When 64 bit math is not enabled within Clipper, coordinate values will be limited to +/-1,500,000,000.
+
+Call this method before doing anything else with your new Clipper object.
 
 =head2 add_subject_polygon
 
@@ -120,22 +304,22 @@ will be clipped.
 Adds a(nother) polygon to the set of polygons that
 define the clipping operation.
 
-=head2 add_subject_poly_polygon
+=head2 add_subject_polygons
 
 Works the same as C<add_subject_polygon> but
-adds a whole set of polygons (a poly-polygon in C<Clipper>
-terminology).
+adds a whole set of polygons.
 
-=head2 add_clip_poly_polygon
+=head2 add_clip_polygons
 
 Works the same as C<add_clip_polygon> but
-adds a whole set of polygons (a poly-polygon in C<Clipper>
-terminology).
+adds a whole set of polygons.
 
 =head2 execute
 
 Performs the actual clipping operation.
-Returns the result as a poly-polygon (cf. L</CONVENTIONS>).
+Returns the result as a reference to an array of polygons.
+
+    my $result = $clipper->execute( CT_UNION );
 
 Parameters: the type of the clipping operation defined
 by one of the constants (C<CF_*>).
@@ -145,16 +329,116 @@ of the subject and clipping polygons as second and third parameters
 respectively. By default, even-odd filling (C<PFT_EVENODD>) will be
 used.
 
+    my $result = $clipper->execute( CT_UNION, PFT_EVENODD, PFT_EVENODD );
+
+=head2 ex_execute
+
+Like C<execute>, performs the actual clipping operation, but
+returns a reference to an array of ExPolygons. (see L</CONVENTIONS>)
+
 =head2 clear
 
 For reuse of a C<Math::Clipper> object, you can call the
-C<clear> method to remove all stashed polygons.
+C<clear> method to remove all polygons and internal data from previous clipping operations.
+
+=head1 UTILITY FUNCTIONS
+
+=head2 integerize_coordinate_sets
+
+Takes an array of polygons and scales all point coordinates so that the values
+will fit in the integer range available. Returns an array reference containing the scaling factors
+used for each coordinate column. The polygon data will be scaled in-place. The scaling vector is returned
+so you can "unscale" the data when you're done, using C<unscale_coordinate_sets>.
+
+    my $scale_vector = integerize_coordinate_sets( $poly1 , $poly2 , $poly3 );
+
+The main purpose of this function is to convert floating point coordinate data to integers.
+As of Clipper version 4, only integer coordinate data is allowed. This helps make the 
+intersection algorithm robust, but it's a bit inconvenient if your data is in floating point format.
+This utility function is meant to make it easy to convert your data to Clipper-friendly integers, while
+retaining as much precision as possible. When you're done with your clipping operations, you can use the
+C<unscale_coordinate_sets> function to scale results back to your original scale.
+
+Convert all your polygons at once, with one call to C<integerize_coordinate_sets>, before loading the
+polygons into your clipper object. The scaling factors need to be calculated so that all
+polygons involved fit in the available integer space.
+
+By default, the scaling is uniform between coordinate columns (e.g., the X values are scaled by the same
+factor as the Y values) making all the scaling factors returned the same. In other words, by default, the aspect ratio
+between X and Y is constrained.
+
+Options may be passed in an anonymous hash, as the first argument, to override defaults.
+If the first argument is not a hash reference, it is taken instead as the first polygon to be scaled.
+
+    my $scale_vector = integerize_coordinate_sets( {
+                                                    constrain => 0, # don't do uniform scaling
+                                                    bits => 32      # use the +/- 1,500,000,000 integer range
+                                                    },
+                                                    $poly1 , $poly2 , $poly3
+                                                 );
+
+The C<bits> option can be 32, 53, or 64. The default will be 53 or 64, depending on whether your
+Perl uses 64 bit integers. 
+
+Be sure to set the C<bits> option to 32 when you have told Clipper
+to use 32 bit integer math internally, using the C<use_full_coordinate_range> method.
+
+The C<constrain> option is a boolean. Default is true. When set to false, each
+column of coordinates (X, Y) will be scaled independently. This may be useful
+when the domain of the X values is very much larger or smaller than the domain
+of the Y values, to get better resolution for the smaller domain. The different scaling
+factors will be available in the returned scaling vector (array reference).
+
+This utility will also operate on coordinates with three or more dimensions. Though the context here
+is 2D, be aware of this if you happen to feed it 3D data. Large domains in the higher dimensions
+could squeeze the 2D data to nothing if scaling is uniform.
+
+=head2 unscale_coordinate_sets
+
+This undoes the scaling done by C<integerize_coordinate_sets>. Use this on the polygons returned
+by the C<execute> method. Pass the scaling vector returned by C<integerize_coordinate_sets>, and 
+the polygons to "unscale". The polygon coordinates will be updated in place.
+
+    unscale_coordinate_sets($scale,$clipper_result);
+
+=head2 offset
+
+Takes a reference to an array of polygons, and a positive or negative offset dimension.
+Returns a new set of polygons, offset by the given dimension.
+
+A positive offset dimension makes filled polygons grow outward, and their holes shrink.
+A negative offset makes polygons shrink and their holes grow.
+
+When doing negative offsets, you may find the winding order of the results to be the opposite 
+of what you expect. Check it and change it if winding order is important in your application.
+
+    $offset_polygon = offset($polygons, $delta);
+
+=head2 area
+
+Returns the signed area of a single polygon.
+A counter clockwise wound polygon area will be positive.
+A clockwise wound polygon area will be negative.
+
+    $area = area($polygon);
+
+=head2 is_counter_clockwise
+
+Determine if a polygon is wound counter clockwise. Returns true if it is, false if it isn't.
+
+    $poly = [ [0, 0] , [2, 0] , [1, 1] ]; # a counter clockwise wound polygon
+    $direction = is_counter_clockwise($poly);
+    # now $direction == 1
 
 =head1 SEE ALSO
 
 The SourceForge project page of Clipper:
 
 L<http://sourceforge.net/projects/polyclipping/>
+
+=head1 VERSION
+
+This module was built around, and includes, Clipper version 4.3.0.
 
 =head1 AUTHOR
 
