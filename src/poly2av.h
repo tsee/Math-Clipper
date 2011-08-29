@@ -14,8 +14,19 @@ polygon2perl(pTHX_ const clipper::Polygon& poly)
     innerav = newAV();
     av_store(av, i, newRV_noinc((SV*)innerav));
     av_fill(innerav, 1);
+    // IVSIZE is from perl/lib/CORE/config.h, defined as sizeof(IV)
+#if IVSIZE >= 8
+    // if Perl integers are 64 bit, use newSViv()
+    av_store(innerav, 0, newSViv(poly[i].X));
+    av_store(innerav, 1, newSViv(poly[i].Y));
+#else
+    // otherwise we expect Clipper integers to fit in the
+	// 53 bit mantissa of a Perl double
     av_store(innerav, 0, newSVnv(poly[i].X));
     av_store(innerav, 1, newSVnv(poly[i].Y));
+#endif
+
+
   }
   return (SV*)newRV_noinc((SV*)av);
 }
