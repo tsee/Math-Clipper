@@ -66,27 +66,27 @@ my $B = [
 #not enough sig figs, even with int64, to hold original coords in integers
 #so some coords become plain zero
 my $Ac=clone($A);
-my $scalevec=integerize_coordinate_sets({constrain=>1,bits=>53},$Ac);
+my $scalevec=integerize_coordinate_sets({constrain=>1},$Ac);
 $clipper->add_subject_polygon($Ac);
 $result = $clipper->execute(CT_UNION);
 is(scalar(@{$result}),1,'round-tripped polygon preserved. b');
-#diag("\n\nreally?:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$Aexpect})."\n\n");
+#diag("\n\nintegerized constrained:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$Aexpect})."\n\n");
 cmp_deeply($result->[0],bag(@{$Aexpect}),'lose smallest digits when integerized constrained');
 unscale_coordinate_sets($scalevec,$result);
-#diag("\n\nreally?:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$AexpectUnscaled})."\n\n");
+#diag("\n\nintegerized constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$AexpectUnscaled})."\n\n");
 cmp_deeply($result->[0],bag(@{$AexpectUnscaled}),'lose smallest digits when integerized constrained - unscaled');
 $clipper->clear;
 
 # use non-constrained scaling to preserve digits that wouldn't be preserved with constrained
 $Ac=clone($A);
-$scalevec=integerize_coordinate_sets({constrain=>0,bits=>53},$Ac);
+$scalevec=integerize_coordinate_sets({constrain=>0},$Ac);
 $clipper->add_subject_polygon($Ac);
 $result = $clipper->execute(CT_UNION);
 is(scalar(@{$result}),1,'round-tripped polygon preserved. c');
-#diag("\n\nreally?:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A2expect})."\n\n");
+#diag("\n\nintegerized not constrained:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A2expect})."\n\n");
 cmp_deeply($result->[0],bag(@{$A2expect}),'keep smallest digits when integerized not constrained');
 unscale_coordinate_sets($scalevec,$result);
-#diag("\n\nreally?:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A})."\n\n");
+#diag("\n\nintegerized not constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A})."\n\n");
 cmp_deeply($result->[0],bag(@{$A}),'keep smallest digits when integerized not constrained - unscaled');
 $clipper->clear;
 
