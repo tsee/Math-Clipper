@@ -28,7 +28,7 @@ our @EXPORT = qw();
 
 my %intspecs = (
     '64' => {
-            maxint    => 9223372036854775807,   # or 9223372036854775808, but close enough - signed 64 bit integer max
+            maxint    => 9223372036854775806,   # signed 64 bit int range: -9223372036854775808 to 9223372036854775807; BUT Clipper seems to only work up to 9223372036854775806
             maxdigits => 19
             },
     '53' => {
