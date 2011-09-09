@@ -119,7 +119,8 @@ sub integerize_coordinate_sets {
             }
         }
     
-    # By default, scaling is independent for each
+    # If the "constrain" option is set false,
+	# scaling is independent for each
     # coordinate column - all the Xs get one scale
     # all the Ys something else - to take the greatest
     # advantage of the available integer domain.
@@ -137,6 +138,7 @@ sub integerize_coordinate_sets {
         foreach my $vector (@{$set}) {
             for (my $ci=0;$ci<$coord_count;$ci++) {
                 $vector->[$ci] *= $scale_vector[$ci];
+                if (abs($vector->[$ci] < 1)) {$vector->[$ci] = sprintf("%.1f",$vector->[$ci]/10)*10;}
                 }
             }
         }
