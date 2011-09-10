@@ -3,7 +3,7 @@ package Math::Clipper;
 use 5.008;
 use strict;
 use warnings;
-use Carp 'croak';
+use Carp qw(croak carp);
 use Config;
 
 use Exporter();
@@ -41,6 +41,9 @@ my %intspecs = (
             },
     );
 
+my $is64safe = (defined($Config{use64bitint}) && $Config{use64bitint} eq 'define' || $Config{longsize}   >= 8 ) &&
+               (defined($Config{d_longdbl})   && $Config{d_longdbl}   eq 'define' || $Config{doublesize} == $Config{longdblsize});
+
 sub offset {
 	my $polygons = shift;
 	my $delta = shift;
@@ -70,7 +73,8 @@ sub integerize_coordinate_sets {
     my %opts=();
     if (ref($_[0]) =~ /HASH/) {%opts=%{(shift)};}
     $opts{constrain} =  1 if !defined($opts{constrain});
-    $opts{bits}      = ((defined($Config{use64bitint}) && $Config{use64bitint} eq "define") || $Config{longsize} >= 8 ? 64 : 53 ) if !defined($opts{bits});
+    $opts{bits}      = ($is64safe ? 64 : 53) if !defined($opts{bits});
+	if ($opts{bits} == 64 && !$is64safe) {$opts{bits} = 53; carp "Integerize to 64 bits requires both long long and long double underlying Perl's default integer and double types. Using 53 bits instead.";}
     $opts{margin} =  0 if !defined($opts{margin});
 
     # assume all coordinate vectors (points) have same number of coordinates; get that count from first one
@@ -368,6 +372,7 @@ so you can "unscale" the data when you're done, using C<unscale_coordinate_sets>
 The main purpose of this function is to convert floating point coordinate data to integers.
 As of Clipper version 4, only integer coordinate data is allowed. This helps make the 
 intersection algorithm robust, but it's a bit inconvenient if your data is in floating point format.
+
 This utility function is meant to make it easy to convert your data to Clipper-friendly integers, while
 retaining as much precision as possible. When you're done with your clipping operations, you can use the
 C<unscale_coordinate_sets> function to scale results back to your original scale.
@@ -391,7 +396,8 @@ If the first argument is not a hash reference, it is taken instead as the first 
                                                  );
 
 The C<bits> option can be 32, 53, or 64. The default will be 53 or 64, depending on whether your
-Perl uses 64 bit integers. 
+Perl uses 64 bit integers AND long doubles by default. (The scaling involves math with native doubles,
+so it's not enough to just have 64 bit integers.)
 
 Be sure to set the C<bits> option to 32 when you have told Clipper
 to use 32 bit integer math internally, using the C<use_full_coordinate_range> method.
