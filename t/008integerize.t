@@ -22,6 +22,7 @@ else {
     $maxint=$maxint_53;
     }
 
+note('Using ' . ($maxint==$maxint_53 ? '53' : '64') . ' bit integers max');
 
 
 #######################################
