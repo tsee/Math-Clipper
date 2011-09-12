@@ -10,17 +10,17 @@ my $maxint;
 my $extraexp=0;
 my $is64safe=0;
 if (
-	((defined($Config{use64bitint}) && $Config{use64bitint} eq 'define') || $Config{longsize} >= 8)
-	&&
-	((defined($Config{d_longdbl}) && $Config{d_longdbl} eq 'define') || $Config{doublesize} == $Config{longdblsize})
-	) {
+    ((defined($Config{use64bitint}) && $Config{use64bitint} eq 'define') || $Config{longsize} >= 8)
+    &&
+    ((defined($Config{d_longdbl}) && $Config{d_longdbl} eq 'define') || $Config{doublesize} == $Config{longdblsize})
+) {
     $maxint=$maxint_64;
     $extraexp=3;
-	$is64safe=1;
-    }
+    $is64safe=1;
+}
 else {
     $maxint=$maxint_53;
-    }
+}
 
 note('Using ' . ($maxint==$maxint_53 ? '53' : '64') . ' bit integers max');
 
@@ -41,9 +41,15 @@ my $clipper = Math::Clipper->new;
 $clipper->use_full_coordinate_range(1);
 $clipper->add_subject_polygon($big_diamond);
 my $result = $clipper->execute(CT_UNION);
-is(scalar(@{$result}),1,'round-tripped polygon preserved. a');
+
+is(scalar(@{$result}), 1, 'round-tripped polygon preserved.');
+
 #diag("\n\npoints at limits:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$big_diamond})."\n\n");
-cmp_deeply($result->[0],bag(@{$big_diamond}),'round-tripped coords at integer limits preserved');
+cmp_deeply(
+    $result->[0],
+    bag(@{$big_diamond}),
+    'round-tripped coords at integer limits preserved'
+);
 $clipper->clear;
 
 
@@ -53,51 +59,50 @@ $clipper->clear;
 # results
 
 my $A = [
-[-0.00000000000002               , -5.67999999999999],
-[ 0.00000000000000000000000001234,-56.78888888888888],
-[ 0.00000000000000000000000001234, 56.77777777777777]
+    [-0.00000000000002               , -5.67999999999999],
+    [ 0.00000000000000000000000001234,-56.78888888888888],
+    [ 0.00000000000000000000000001234, 56.77777777777777]
 ];
 my $Aexpect = [ # in 32 bit environment, we get 53 bit integers back from Clipper, in floats, which may be in sci. notation, or not
-[ -0.00000000000002 * 10**(14+$extraexp),  -5.67999999999999 * 10**(14+$extraexp)],
-[ 0, -56.78888888888888  * 10**(14+$extraexp)],
-[ 0,  56.77777777777777 * 10**(14+$extraexp)]
+    [ -0.00000000000002 * 10**(14+$extraexp),  -5.67999999999999 * 10**(14+$extraexp)],
+    [ 0, -56.78888888888888  * 10**(14+$extraexp)],
+    [ 0,  56.77777777777777 * 10**(14+$extraexp)]
 ];
 my $A2expect = [
-[ -0.00000000000002 * 10**(29+$extraexp),  -5.67999999999999 * 10**(14+$extraexp)],
-[ 1234, -56.78888888888888  * 10**(14+$extraexp)],
-[ 1234,  56.77777777777777 * 10**(14+$extraexp)]
+    [ -0.00000000000002 * 10**(29+$extraexp),  -5.67999999999999 * 10**(14+$extraexp)],
+    [ 1234, -56.78888888888888  * 10**(14+$extraexp)],
+    [ 1234,  56.77777777777777 * 10**(14+$extraexp)]
 ];
 my $Aexpect_string = [ # in 64 bit environment, we get real integers back from Clipper, expect always in integer form, no exponents
-[ '-2'.('0' x $extraexp),        '-567'.('9' x 12).('0' x $extraexp)],
-[ 0,                            '-5678'.('8' x 11).('0' x $extraexp)],
-[ 0,                             '5677'.('7' x 11).('0' x $extraexp)]
+    [ '-2'.('0' x $extraexp),        '-567'.('9' x 12).('0' x $extraexp)],
+    [ 0,                            '-5678'.('8' x 11).('0' x $extraexp)],
+    [ 0,                             '5677'.('7' x 11).('0' x $extraexp)]
 ];
 my $A2expect_string = [
-[ '-2'.('0' x (15+$extraexp)),   '-567'.('9' x 12).('0' x $extraexp)],
-[ 1234,                         '-5678'.('8' x 11).('0' x $extraexp)],
-[ 1234,                          '5677'.('7' x 11).('0' x $extraexp)]
+    [ '-2'.('0' x (15+$extraexp)),   '-567'.('9' x 12).('0' x $extraexp)],
+    [ 1234,                         '-5678'.('8' x 11).('0' x $extraexp)],
+    [    1234,                          '5677'.('7' x 11).('0' x $extraexp)]
 ];
 my $AexpectUnscaled = [
-[ -0.00000000000002,  -5.67999999999999],
-[ 0, -56.78888888888888],
-[ 0,  56.77777777777777]
+    [ -0.00000000000002,  -5.67999999999999],
+    [ 0, -56.78888888888888],
+    [ 0,  56.77777777777777]
 ];
 my $B = [
-[ 1000000000000001,  -1000000000000001],
-[ 0.5, 0.4],
-[-0.5,-0.4]
+    [ 1000000000000001,  -1000000000000001],
+    [ 0.5, 0.4],
+    [-0.5,-0.4]
 ];
 my $Bexpect = [
-[ 1000000000000001,  -1000000000000001],
-[ 1,  0],
-[-1, 0]
+    [ 1000000000000001,  -1000000000000001],
+    [ 1,  0],
+    [-1, 0]
 ];
 
 if ($is64safe) {
     $Aexpect=$Aexpect_string;
     $A2expect=$A2expect_string;
-    }
-
+}
 
 
 #######################################
@@ -160,16 +165,16 @@ cmp_deeply(f1($Bc),bag(@{f1($Bexpect)}),'rounding');
 #######################################
 # unscaling coordinate sets
 my $S=[
-[1,2,3,4],
-[5,6,7,8]
+    [1,2,3,4],
+    [5,6,7,8]
 ];
 my $Sexpect=[
-[10,20,30,40],
-[50,60,70,80]
+    [10,20,30,40],
+    [50,60,70,80]
 ];
 my $S2expect=[
-[10,10, -6,400],
-[50,30,-14,800]
+    [10,10, -6,400],
+    [50,30,-14,800]
 ];
 
 unscale_coordinate_sets(1/10,[$S]);
