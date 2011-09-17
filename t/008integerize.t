@@ -3,6 +3,8 @@ use Config;
 use Test::More tests=>14;
 use Test::Deep;
 
+my $diagnostics=0;
+
 my $maxint_64=9223372036854775806; # signed 64 bit int range: -9223372036854775808 to 9223372036854775807; BUT Clipper seems to only work up to 9223372036854775806
 my $maxint_53=   9007199254740992; # for integers stored in double precision floats with 53 bit mantissa
 my $maxint;
@@ -10,18 +12,18 @@ my $maxint;
 my $extraexp=0;
 my $is64safe=0;
 if (
-	((defined($Config{use64bitint}) && $Config{use64bitint} eq 'define') || $Config{longsize} >= 8)
+	((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'define') || $Config{longsize}   >= 8 )
 	&&
-	((defined($Config{d_longdbl}) && $Config{d_longdbl} eq 'define') || $Config{doublesize} == $Config{longdblsize})
+	((defined($Config{uselongdouble}) && $Config{uselongdouble} eq 'define') || $Config{doublesize} >= 10)
 	) {
     $maxint=$maxint_64;
     $extraexp=3;
 	$is64safe=1;
+    #diag("\nPerl with quads and long doubles.\n");
     }
 else {
     $maxint=$maxint_53;
     }
-
 
 
 #######################################
@@ -41,7 +43,7 @@ $clipper->use_full_coordinate_range(1);
 $clipper->add_subject_polygon($big_diamond);
 my $result = $clipper->execute(CT_UNION);
 is(scalar(@{$result}),1,'round-tripped polygon preserved. a');
-#diag("\n\npoints at limits:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$big_diamond})."\n\n");
+if ($diagnostics) {diag("\n\npoints at limits:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$big_diamond})."\n\n");}
 cmp_deeply($result->[0],bag(@{$big_diamond}),'round-tripped coords at integer limits preserved');
 $clipper->clear;
 
@@ -105,15 +107,15 @@ if ($is64safe) {
 # so some coords become plain zero
 my $Ac=clone($A);
 my $scalevec=integerize_coordinate_sets({constrain=>1},$Ac);
-####diag("\n\nintegerized constrained:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Ac)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Aexpect)})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized constrained:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Ac)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Aexpect)})."\n\n");}
 cmp_deeply(f1($Ac),bag(@{f1($Aexpect)}),'lose smallest digits when integerized constrained');
 $clipper->add_subject_polygon($Ac);
 $result = $clipper->execute(CT_UNION);
 is(scalar(@{$result}),1,'round-tripped polygon preserved. b');
-####diag("\n\nintegerized constrained roundtripped:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($result->[0])})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Aexpect)})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized constrained roundtripped:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($result->[0])})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Aexpect)})."\n\n");}
 cmp_deeply(f1($result->[0]),bag(@{f1($Aexpect)}),'lose smallest digits when integerized constrained - roundtripped');
 unscale_coordinate_sets($scalevec,$result);
-#diag("\n\nintegerized constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$AexpectUnscaled})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$AexpectUnscaled})."\n\n");}
 cmp_deeply($result->[0],bag(@{$AexpectUnscaled}),'lose smallest digits when integerized constrained - unscaled');
 $clipper->clear;
 
@@ -125,15 +127,15 @@ $clipper->clear;
 # preserved with constrained
 $Ac=clone($A);
 $scalevec=integerize_coordinate_sets({constrain=>0},$Ac);
-####diag("\n\nintegerized not constrained:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Ac)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($A2expect)})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized not constrained:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Ac)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($A2expect)})."\n\n");}
 cmp_deeply(f1($Ac),bag(@{f1($A2expect)}),'keep smallest digits when integerized not constrained');
 $clipper->add_subject_polygon($Ac);
 $result = $clipper->execute(CT_UNION);
 is(scalar(@{$result}),1,'round-tripped polygon preserved. c');
-####diag("\n\nintegerized not constrained roundtripped:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($result->[0])})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($A2expect)})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized not constrained roundtripped:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($result->[0])})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($A2expect)})."\n\n");}
 cmp_deeply(f1($result->[0]),bag(@{f1($A2expect)}),'keep smallest digits when integerized not constrained - roundtripped');
 unscale_coordinate_sets($scalevec,$result);
-#diag("\n\nintegerized not constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A})."\n\n");
+if ($diagnostics) {diag("\n\nintegerized not constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A})."\n\n");}
 cmp_deeply($result->[0],bag(@{$A}),'keep smallest digits when integerized not constrained - unscaled');
 $clipper->clear;
 
@@ -152,7 +154,7 @@ is_deeply($scalevec,[10**14,10**13,10**12],'scaling vector accommodates all poly
 # rounding of ones place for n < 1
 my $Bc=clone($B);
 $scalevec=integerize_coordinate_sets({constrain=>0,bits=>53},$Bc);
-#diag("\n\nrounding:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Bc)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Bexpect)})."\n\n");
+if ($diagnostics) {diag("\n\nrounding:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Bc)})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{f1($Bexpect)})."\n\n");}
 cmp_deeply(f1($Bc),bag(@{f1($Bexpect)}),'rounding');
 
 

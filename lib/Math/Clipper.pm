@@ -41,8 +41,8 @@ my %intspecs = (
             },
     );
 
-my $is64safe = (defined($Config{use64bitint}) && $Config{use64bitint} eq 'define' || $Config{longsize}   >= 8 ) &&
-               (defined($Config{d_longdbl})   && $Config{d_longdbl}   eq 'define' || $Config{doublesize} == $Config{longdblsize});
+my $is64safe = ((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'define') || $Config{longsize}   >= 8 ) &&
+               ((defined($Config{uselongdouble}) && $Config{uselongdouble} eq 'define') || $Config{doublesize} >= 10);
 
 sub offset {
 	my $polygons = shift;
