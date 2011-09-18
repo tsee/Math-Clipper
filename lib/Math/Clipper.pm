@@ -283,6 +283,9 @@ between the segment and all polygons are calculated. If the intersection
 count is odd, the inner-most (if nested) polygon containing the segment's start point is considered to be
 filled. When the intersection count is even, that polygon is considered to be a hole.
 
+For an example case in which NONZERO and EVENODD produce different results see 
+L<NONZERO vs. EVENODD> section below.
+
 =head1 METHODS
 
 =head2 new
@@ -464,6 +467,39 @@ Determine if a polygon is wound counter clockwise. Returns true if it is, false 
     $poly = [ [0, 0] , [2, 0] , [1, 1] ]; # a counter clockwise wound polygon
     $direction = is_counter_clockwise($poly);
     # now $direction == 1
+
+=head1 NONZERO vs. EVENODD
+
+Consider the following example:
+
+    my $p1 = [ [0,0], [200000,0], [200000,200000]             ];   # CCW
+    my $p2 = [ [0,200000], [0,0], [200000,200000]             ];   # CCW
+    my $p3 = [ [0,0], [200000,0], [200000,200000], [0,200000] ];   # CCW
+
+    my $clipper = Math::Clipper->new;
+    $clipper->add_subject_polygon($p1);
+    $clipper->add_clip_polygons([$p2, $p3]);
+    my $result = $clipper->execute(CT_UNION, PFT_EVENODD, PFT_EVENODD);
+
+C<$p3> is a square, and C<$p1> and C<$p2> are triangles covering two halves of the C<$p3> area.
+The C<CT_UNION> operation will produce different results if C<PFT_EVENODD> or C<PFT_NONZERO>
+are used. This is because of the strategy used by Clipper to identify overlapping regions.
+
+Let's see the thing in detail: C<$p2> and C<$p3> are the clip polygons. C<$p2> overlaps half of C<$p3>. 
+With the C<PFT_EVENODD> hole detection method, how many polygons overlap in a gievn area determines 
+whether that area is a hole or a filled region. If an odd number of polygons overlap there, it's a 
+filled region. If an even number, it's a hole/empty region. So with C<PFT_EVENODD>, winding order 
+doesn't matter. What matters is where things overlap.
+
+So using C<PFT_EVENODD>, and considering C<$p2> and C<$p3> as the set of clipping polygons, the fact that 
+C<$p2> overlaps half of C<$p3> means that the region where they overlap is empty. In effect, in this example, 
+the set of clipping polygons ends up defining the same shape as the subject polygon C<$p1>. So the union 
+is just the union of two identical polygons.
+
+When you switch it to use C<PFT_NONZERO>, the set of clipping polygons is understood as two filled 
+polygons, because of the winding order. The area where they overlap is considered filled, just 
+because there is at least one filled polygon in that area. This is a good example of how C<PFT_NONZERO> 
+is more explicit, and perhaps more intuitive.
 
 =head1 SEE ALSO
 
