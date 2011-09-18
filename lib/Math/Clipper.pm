@@ -49,7 +49,7 @@ sub offset {
 	my $delta = shift;
 	my $scale = @_ ? shift:100;
 	my $scalevec=[$scale,$scale];
-	my $polyscopy=[(map {[(map {[(map {$_*=$scalevec->[0]} @{$_})]} @{$_})]} @{$polygons})];
+	my $polyscopy=[(map {[(map {[(map {$_*$scalevec->[0]} @{$_})]} @{$_})]} @{$polygons})];
 	my $ret = _offset($polyscopy,$delta*$scale);
 	unscale_coordinate_sets($scalevec , $ret);
 	return $ret;
