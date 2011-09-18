@@ -188,7 +188,7 @@ Math::Clipper - Polygon clipping in 2D
                [0, 0.002]
               ];
 
- # But we can have them automatically scaled up (in place) to a safe 32 bit integer range
+ # But we can have them automatically scaled up (in place) to a safe integer range
 
  my $scale = integerize_coordinate_sets( $poly_1 , $poly_2 );
  $clipper->add_subject_polygon( $poly_1 );
@@ -197,7 +197,7 @@ Math::Clipper - Polygon clipping in 2D
  # to convert the results (in place) back to the original scale:
  unscale_coordinate_sets( $scale, $result );
 
- # Example using 32 bit integer math instead of 53 or 64
+ # Example using 32 bit integer math instead of the default 53 or 64
  # (less precision, a bit faster)
  my $clipper32 = Math::Clipper->new;
  $clipper32->use_full_coordinate_range(0);
@@ -482,24 +482,26 @@ Consider the following example:
     my $result = $clipper->execute(CT_UNION, PFT_EVENODD, PFT_EVENODD);
 
 C<$p3> is a square, and C<$p1> and C<$p2> are triangles covering two halves of the C<$p3> area.
-The C<CT_UNION> operation will produce different results if C<PFT_EVENODD> or C<PFT_NONZERO>
-are used. This is because of the strategy used by Clipper to identify overlapping regions.
+The C<CT_UNION> operation will produce different results, depending on whether C<PFT_EVENODD> or C<PFT_NONZERO>
+is used. These are the two different strategies used by Clipper to identify filled vs. empty regions.
 
 Let's see the thing in detail: C<$p2> and C<$p3> are the clip polygons. C<$p2> overlaps half of C<$p3>. 
-With the C<PFT_EVENODD> hole detection method, how many polygons overlap in a gievn area determines 
+With the C<PFT_EVENODD> fill strategy, the number of polygons that overlap in a given area determines 
 whether that area is a hole or a filled region. If an odd number of polygons overlap there, it's a 
 filled region. If an even number, it's a hole/empty region. So with C<PFT_EVENODD>, winding order 
-doesn't matter. What matters is where things overlap.
+doesn't matter. What matters is where areas overlap.
 
-So using C<PFT_EVENODD>, and considering C<$p2> and C<$p3> as the set of clipping polygons, the fact that 
+So, using C<PFT_EVENODD>, and considering C<$p2> and C<$p3> as the set of clipping polygons, the fact that 
 C<$p2> overlaps half of C<$p3> means that the region where they overlap is empty. In effect, in this example, 
 the set of clipping polygons ends up defining the same shape as the subject polygon C<$p1>. So the union 
-is just the union of two identical polygons.
+is just the union of two identical polygons, and the result is a triangle equivalent to C<$p1>.
 
-When you switch it to use C<PFT_NONZERO>, the set of clipping polygons is understood as two filled 
-polygons, because of the winding order. The area where they overlap is considered filled, just 
-because there is at least one filled polygon in that area. This is a good example of how C<PFT_NONZERO> 
-is more explicit, and perhaps more intuitive.
+If, instead, the C<PFT_NONZERO> strategy is specified, the set of clipping polygons is understood as two filled 
+polygons, because of the winding order. The area where they overlap is considered filled,
+because there is at least one filled polygon in that area. The set of clipping polygons in this case is equivalent
+to the square C<$p3>, and the result of the C<CT_UNION> operation is also equivalent to the square C<$p3>.
+
+This is a good example of how C<PFT_NONZERO> is more explicit, and perhaps more intuitive.
 
 =head1 SEE ALSO
 
