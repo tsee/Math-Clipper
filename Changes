@@ -1,11 +1,41 @@
 Revision history for Perl extension Math::Clipper.
 
-1.00  ... 2011
-  * WARNING * Incompatible changes!
+1.00  Mon Sep 19 08:48:00 2011
+  * WARNING * This release contains incompatible changes!
+
   - Upgraded the Clipper library to the newest available version 4.3.0.
+
   - Clipper 4.3.0 has various interface changes, see the documentation
     for details. Most importantly, the coordinates are now 64bit
     integers instead of floating point numbers.
 
-0.01  Thu Aug 19 19:00 2010
+  - Clipper 4.3.0 now works with large integers internally instead of
+    floats. Thus, this release adds support and tests for Clipper's
+    int/double conversions.
+
+  - Add ex_execute() for ExPolygons.
+
+  - Add use_full_coordinate_range() method.
+
+  - Remove broken is_clockwise() function and replace with
+    is_counter_clockwise(), which is what the C++ function
+    IsClockwise() has been doing all along.
+
+  - area() is now a function instead of a method.
+
+  - Exposes polygon_offset function.
+
+  - force_orientation related functions are gone.
+
+  - Compilation fixes for Windows perls and compilers.
+
+  - Internals:
+    => Use ExtUtils::Typemaps instead of the deprecated
+       ExtUtils::Typemap.
+    => Moved all XS++ types to the clipper:: C++ namespace to avoid
+       collisions on Win32.
+
+0.01  Thu Aug 19 19:00:00 2010
+  
   - original version
+
