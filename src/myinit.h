@@ -5,6 +5,6 @@
 
 #include "poly2av.h"
 
-using namespace clipper;
+using namespace ClipperLib;
 
 #endif

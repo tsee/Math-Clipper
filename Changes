@@ -1,5 +1,9 @@
 Revision history for Perl extension Math::Clipper.
 
+  - Upgraded the Clipper library to the newest available version 4.4.4.
+  
+  - New jointype and miterlimit arguments supported for OffsetPolygons
+
 1.00  Mon Sep 19 08:48:00 2011
   * WARNING * This release contains incompatible changes!
 

@@ -3,15 +3,16 @@ Clipper*		O_OBJECT
 PolyType		T_UV
 ClipType		T_UV
 PolyFillType		T_UV
+JoinType		T_UV
 
-clipper::Polygon			T_VECTOR_POINT
-clipper::Polygon*		T_VECTOR_POINT_PTR
-clipper::Polygons		T_VECTOR_VECTOR_POINT
-clipper::Polygons*		T_VECTOR_VECTOR_POINT_PTR
-clipper::ExPolygon		T_EXPOLY
-clipper::ExPolygon*		T_EXPOLY_PTR
-clipper::ExPolygons		T_VECTOR_EXPOLY
-clipper::ExPolygons*		T_VECTOR_EXPOLY_PTR
+ClipperLib::Polygon			T_VECTOR_POINT
+ClipperLib::Polygon*		T_VECTOR_POINT_PTR
+ClipperLib::Polygons		T_VECTOR_VECTOR_POINT
+ClipperLib::Polygons*		T_VECTOR_VECTOR_POINT_PTR
+ClipperLib::ExPolygon		T_EXPOLY
+ClipperLib::ExPolygon*		T_EXPOLY_PTR
+ClipperLib::ExPolygons		T_VECTOR_EXPOLY
+ClipperLib::ExPolygons*		T_VECTOR_EXPOLY_PTR
 
 INPUT
 T_VECTOR_POINT

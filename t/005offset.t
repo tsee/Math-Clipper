@@ -29,16 +29,10 @@ map {
 	} @{$offpolys2};
 is($asum,((16 + 20) + (28) - (16 - 12)),'area check for positive cw off');
 
-
-##############################
-# Looks like winding order you would expect in results is reversed when doing negative offsets.
-# So area check below uses the negative of the area expected.
-##############################
-
 my $offpolys3 = Math::Clipper::offset([$ccw], -1.0, 1);
 #diag("\ngoing in wind2:".Math::Clipper::is_counter_clockwise($ccw) . " vs " .Math::Clipper::is_counter_clockwise($offpolys3->[0]));
 ok(scalar(@{$offpolys3})==1,'negative offset, on ccw');
-is(Math::Clipper::area($offpolys3->[0]),-(16 - 12),'area check for negative ccw off');
+is(Math::Clipper::area($offpolys3->[0]),(16 - 12),'area check for negative ccw off');
 
 my $offpolys4 = Math::Clipper::offset([$offpolys2->[0],$offpolys2->[1]], -1.0, 1);
 ok(scalar(@{$offpolys4})==2,'negative offset, on cw');
@@ -47,4 +41,4 @@ map {
 	#diag("\n".Math::Clipper::area($_));
 	$asum+=Math::Clipper::area($_)
 	} @{$offpolys4};
-is($asum,-((16 + 20) - 16),'area check for negative cw off');
+is($asum,((16 + 20) - 16),'area check for negative cw off');

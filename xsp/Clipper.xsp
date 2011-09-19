@@ -19,6 +19,9 @@ _constant()
     PT_CLIP = ptClip
     PFT_EVENODD = pftEvenOdd
     PFT_NONZERO = pftNonZero
+    JT_MITER = jtMiter
+    JT_ROUND = jtRound
+    JT_SQUARE = jtSquare
   CODE:
     RETVAL = ix;
   OUTPUT: RETVAL
@@ -32,26 +35,26 @@ class Clipper {
   %name{use_full_coordinate_range} void UseFullCoordinateRange(bool newVal);
 
 %{
-clipper::Polygons*
+ClipperLib::Polygons*
 execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
   CODE:
-    RETVAL = new clipper::Polygons();
+    RETVAL = new ClipperLib::Polygons();
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
   OUTPUT:
     RETVAL
     
-clipper::ExPolygons*
+ClipperLib::ExPolygons*
 ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
   CODE:
-    RETVAL = new clipper::ExPolygons();
+    RETVAL = new ClipperLib::ExPolygons();
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
   OUTPUT:
     RETVAL
@@ -72,7 +75,7 @@ ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
 void
 add_subject_polygon(self, poly)
     Clipper* self
-    clipper::Polygon* poly
+    ClipperLib::Polygon* poly
   PPCODE:
     self->AddPolygon(*poly, ptSubject);
     delete poly;
@@ -80,7 +83,7 @@ add_subject_polygon(self, poly)
 void
 add_clip_polygon(self, poly)
     Clipper* self
-    clipper::Polygon* poly
+    ClipperLib::Polygon* poly
   PPCODE:
     self->AddPolygon(*poly, ptClip);
     delete poly;
@@ -88,7 +91,7 @@ add_clip_polygon(self, poly)
 void
 add_subject_polygons(self, polys)
     Clipper* self
-    clipper::Polygons* polys
+    ClipperLib::Polygons* polys
   PPCODE:
     self->AddPolygons(*polys, ptSubject);
     delete polys;
@@ -96,7 +99,7 @@ add_subject_polygons(self, polys)
 void
 add_clip_polygons(self, polys)
     Clipper* self
-    clipper::Polygons* polys
+    ClipperLib::Polygons* polys
   PPCODE:
     self->AddPolygons(*polys, ptClip);
     delete polys;
@@ -109,27 +112,29 @@ add_clip_polygons(self, polys)
 
 double
 is_counter_clockwise(polygon, UseFullInt64Range = 1)
-    clipper::Polygon* polygon
+    ClipperLib::Polygon* polygon
     bool UseFullInt64Range
   CODE:
-    RETVAL = clipper::IsClockwise(*polygon, UseFullInt64Range);
+    RETVAL = ClipperLib::IsClockwise(*polygon, UseFullInt64Range);
   OUTPUT: RETVAL
 
 double
 area(polygon, UseFullInt64Range = 1)
-    clipper::Polygon* polygon
+    ClipperLib::Polygon* polygon
     bool UseFullInt64Range
   CODE:
-    RETVAL = clipper::Area(*polygon, UseFullInt64Range);
+    RETVAL = ClipperLib::Area(*polygon, UseFullInt64Range);
   OUTPUT: RETVAL
 
-clipper::Polygons*
-_offset(polygons, delta)
-    clipper::Polygons* polygons
+ClipperLib::Polygons*
+_offset(polygons, delta, jointype, MiterLimit)
+    ClipperLib::Polygons* polygons
     const float delta
+    JoinType jointype
+    const double MiterLimit
   CODE:
-    RETVAL = new clipper::Polygons();
-    clipper::OffsetPolygons(*polygons, *RETVAL, delta);
+    RETVAL = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
   OUTPUT:
     RETVAL
 %}

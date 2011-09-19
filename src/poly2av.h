@@ -4,7 +4,7 @@
 #include "myinit.h"
 
 SV*
-polygon2perl(pTHX_ const clipper::Polygon& poly)
+polygon2perl(pTHX_ const ClipperLib::Polygon& poly)
 {
   AV* av = newAV();
   AV* innerav;
@@ -33,7 +33,7 @@ polygon2perl(pTHX_ const clipper::Polygon& poly)
 
 
 SV*
-polygons2perl(pTHX_ const clipper::Polygons& poly)
+polygons2perl(pTHX_ const ClipperLib::Polygons& poly)
 {
   AV* av = newAV();
   SV* innerav;
@@ -48,7 +48,7 @@ polygons2perl(pTHX_ const clipper::Polygons& poly)
 
 
 SV*
-expolygon2perl(pTHX_ const clipper::ExPolygon& poly)
+expolygon2perl(pTHX_ const ClipperLib::ExPolygon& poly)
 {
   HV* hv = newHV();
   hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ poly.outer) );
@@ -58,7 +58,7 @@ expolygon2perl(pTHX_ const clipper::ExPolygon& poly)
 
 
 SV*
-expolygons2perl(pTHX_ const clipper::ExPolygons& polys)
+expolygons2perl(pTHX_ const ClipperLib::ExPolygons& polys)
 {
   AV* av = newAV();
   SV* innerav;
@@ -73,11 +73,11 @@ expolygons2perl(pTHX_ const clipper::ExPolygons& polys)
 
 
 
-clipper::Polygon*
+ClipperLib::Polygon*
 perl2polygon(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  clipper::Polygon* retval = new clipper::Polygon(len);
+  ClipperLib::Polygon* retval = new ClipperLib::Polygon(len);
   SV** elem;
   AV* innerav;
   for (unsigned int i = 0; i < len; i++) {
@@ -90,30 +90,30 @@ perl2polygon(pTHX_ AV* theAv)
       return NULL;
     }
     innerav = (AV*)SvRV(*elem);
-    clipper::IntPoint& p = (*retval)[i];
+    ClipperLib::IntPoint& p = (*retval)[i];
     // IVSIZE is from perl/lib/CORE/config.h, defined as sizeof(IV)
 #if IVSIZE >= 8
     // if Perl integers are 64 bit, use SvIV()
     // Clipper.pm then supports 64 bit ints.
-    p.X = (clipper::long64)SvIV(*av_fetch(innerav, 0, 0));
-    p.Y = (clipper::long64)SvIV(*av_fetch(innerav, 1, 0));
+    p.X = (ClipperLib::long64)SvIV(*av_fetch(innerav, 0, 0));
+    p.Y = (ClipperLib::long64)SvIV(*av_fetch(innerav, 1, 0));
 #else
     // otherwise coerce the Perl scalar to a double, with SvNV()
     // Perl doubles commonly allow 53 bits for the mantissa.
     // So in the common case, Clipper.pm supports 53 bit integers, stored in doubles on the Perl side.
-    p.X = (clipper::long64)SvNV(*av_fetch(innerav, 0, 0));
-    p.Y = (clipper::long64)SvNV(*av_fetch(innerav, 1, 0));
+    p.X = (ClipperLib::long64)SvNV(*av_fetch(innerav, 0, 0));
+    p.Y = (ClipperLib::long64)SvNV(*av_fetch(innerav, 1, 0));
 #endif
   }
   return retval;
 }
 
 
-clipper::Polygons*
+ClipperLib::Polygons*
 perl2polygons(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  clipper::Polygons* retval = new clipper::Polygons(len);
+  ClipperLib::Polygons* retval = new ClipperLib::Polygons(len);
   SV** elem;
   AV* innerav;
   for (unsigned int i = 0; i < len; i++) {
@@ -126,7 +126,7 @@ perl2polygons(pTHX_ AV* theAv)
       return NULL;
     }
     innerav = (AV*)SvRV(*elem);
-    clipper::Polygon* tmp = perl2polygon(aTHX_ innerav);
+    ClipperLib::Polygon* tmp = perl2polygon(aTHX_ innerav);
     if (tmp == NULL) {
       delete retval;
       return NULL;
@@ -153,7 +153,7 @@ perl2polygons(pTHX_ AV* theAv)
       }                                                                                \
     } STMT_END
 
-clipper::ExPolygon*
+ClipperLib::ExPolygon*
 perl2expolygon(pTHX_ HV* theHv)
 {
   AV* outerav;
@@ -161,15 +161,15 @@ perl2expolygon(pTHX_ HV* theHv)
   AV_CHECK(outerav, theHv, "outer");
   AV_CHECK(holesav, theHv, "holes");
 
-  clipper::ExPolygon* retval = new clipper::ExPolygon();
-  clipper::Polygon* tmp = perl2polygon(aTHX_ outerav);
+  ClipperLib::ExPolygon* retval = new ClipperLib::ExPolygon();
+  ClipperLib::Polygon* tmp = perl2polygon(aTHX_ outerav);
   if (!tmp) {
     delete retval;
     return NULL;
   }
   retval->outer = *tmp;
 
-  clipper::Polygons* tmps = perl2polygons(aTHX_ holesav);
+  ClipperLib::Polygons* tmps = perl2polygons(aTHX_ holesav);
   if (!tmps) {
     delete retval;
     return NULL;
@@ -181,11 +181,11 @@ perl2expolygon(pTHX_ HV* theHv)
 #undef AV_CHECK
 
 
-clipper::ExPolygons*
+ClipperLib::ExPolygons*
 perl2expolygons(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  std::vector<clipper::ExPolygon> tmpEx; // Done because of croak
+  std::vector<ClipperLib::ExPolygon> tmpEx; // Done because of croak
 
   SV** elem;
   HV* innerhv;
@@ -195,14 +195,14 @@ perl2expolygons(pTHX_ AV* theAv)
         || SvTYPE(SvRV(*elem)) != SVt_PVHV)
       return NULL;
     innerhv = (HV*)SvRV(*elem);
-    clipper::ExPolygon* tmp = perl2expolygon(aTHX_ innerhv);
+    ClipperLib::ExPolygon* tmp = perl2expolygon(aTHX_ innerhv);
     if (tmp == NULL)
       return NULL;
     tmpEx[i] = *tmp;
     delete tmp;
   }
 
-  clipper::ExPolygons* retval = new clipper::ExPolygons(tmpEx);
+  ClipperLib::ExPolygons* retval = new ClipperLib::ExPolygons(tmpEx);
   return retval;
 }
 

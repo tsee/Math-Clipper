@@ -1,13 +1,13 @@
 %typemap{bool}{simple};
 
-%typemap{clipper::Polygon};
-%typemap{const clipper::Polygon};
-%typemap{clipper::Polygons};
-%typemap{const clipper::Polygons};
-%typemap{clipper::ExPolygon};
-%typemap{const clipper::ExPolygon};
-%typemap{clipper::ExPolygons};
-%typemap{const clipper::ExPolygons};
+%typemap{ClipperLib::Polygon};
+%typemap{const ClipperLib::Polygon};
+%typemap{ClipperLib::Polygons};
+%typemap{const ClipperLib::Polygons};
+%typemap{ClipperLib::ExPolygon};
+%typemap{const ClipperLib::ExPolygon};
+%typemap{ClipperLib::ExPolygons};
+%typemap{const ClipperLib::ExPolygons};
 
 %typemap{PolyType}{parsed}{
   %cpp_type{PolyType};
@@ -31,4 +31,9 @@
   %};
 };
 
-
+%typemap{JoinType}{parsed}{
+  %cpp_type{JoinType};
+  %precall_code{%
+    $CVar = (JoinType)SvUV($PerlVar);
+  %};
+};
