@@ -19,4 +19,5 @@ MYMETA.yml
 MYMETA.json
 *.o
 META.yml
+META.json
 vc100.pdb
