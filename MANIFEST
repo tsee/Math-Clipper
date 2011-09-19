@@ -21,3 +21,4 @@ t/009expolygon.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
+META.json
