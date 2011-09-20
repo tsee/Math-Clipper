@@ -14,8 +14,9 @@ my $build = Module::Build::WithXSpp->new(
   },
   #for MSVC builds
   early_includes => [qw(
-    cstdio
+    cstring
     cstdlib
+    ostream
     )]
 );
 
