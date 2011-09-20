@@ -30,7 +30,7 @@ _constant()
 
 %name{Math::Clipper}
 class Clipper {
-  Clipper();
+  %name{_new} Clipper();
   ~Clipper();
   %name{use_full_coordinate_range} void UseFullCoordinateRange(bool newVal);
 

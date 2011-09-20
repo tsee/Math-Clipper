@@ -48,6 +48,13 @@ my %intspecs = (
 my $is64safe = ((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'define') || $Config{longsize}   >= 8 ) &&
                ((defined($Config{uselongdouble}) && $Config{uselongdouble} eq 'define') || $Config{doublesize} >= 10);
 
+sub new {
+    my $class = shift;
+    my $clipper = $class->_new();
+    $clipper->use_full_coordinate_range(1);
+    return $clipper;
+}
+
 sub offset {
     my ($polygons, $delta, $scale, $jointype, $miterlimit) = @_;
     $scale      ||= 100;
