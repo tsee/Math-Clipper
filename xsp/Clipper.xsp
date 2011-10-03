@@ -46,7 +46,7 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
   OUTPUT:
     RETVAL
-    
+
 ClipperLib::ExPolygons*
 ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     Clipper* THIS
