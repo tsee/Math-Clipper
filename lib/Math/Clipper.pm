@@ -489,6 +489,11 @@ Determine if a polygon is wound counter clockwise. Returns true if it is, false 
     $direction = is_counter_clockwise($poly);
     # now $direction == 1
 
+Note that Math::Clipper assumes a coordinate system where the Y axis increases upward. If your
+program works with an inverted Y axis (for example, dealing with SVG), the return value of 
+C<is_counter_clockwise()> must be inverted: clockwise polygons become counter-clockwise and
+viceversa.
+
 =head1 NONZERO vs. EVENODD
 
 Consider the following example:
@@ -532,14 +537,14 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 4.3.0.
+This module was built around, and includes, Clipper version 4.4.4.
 
 =head1 AUTHOR
 
 The Perl module was written by:
 
-Steffen Mueller (E<lt>smueller@cpan.orgE<gt>) and
-Mike Sheldrake
+Steffen Mueller (E<lt>smueller@cpan.orgE<gt>),
+Mike Sheldrake and Alessandro Ranellucci (aar/alexrj)
 
 But the underlying library C<Clipper> was written by
 Angus Johnson. Check the SourceForge project page for
