@@ -1,6 +1,6 @@
 use Math::Clipper ':all';
 use Config;
-use Test::More tests=>14;
+use Test::More tests=>15;
 use Test::Deep;
 
 my $diagnostics=0;
@@ -26,6 +26,11 @@ else {
 
 note('Using ' . ($maxint==$maxint_53 ? '53' : '64') . ' bit integers max');
 
+{
+    local $SIG{__WARN__} = sub { die @_; };
+    eval { integerize_coordinate_sets([ [0,0,0] ]); };
+    is $@, '', 'no warnings from integerize_coordinate_sets()';
+}
 
 #######################################
 # huge diamond, points at limits, as

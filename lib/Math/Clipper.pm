@@ -110,7 +110,7 @@ sub integerize_coordinate_sets {
                 # looking for the maximum exponent, when coords are in scientific notation
                 if (sprintf("%.20e",$vector->[$ci] + ($vector->[$ci]<0?-1:1)*$opts{margin}) =~ /[eE]([+-])0*(\d+)$/) {
                     my $exp1 = eval($1.$2);
-                    if ($vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1} 
+                    if (defined $vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1} 
                     }
                 else {croak "some coordinate didn't look like a number: ",$vector->[$ci]}
                 }
