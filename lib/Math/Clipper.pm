@@ -48,13 +48,6 @@ my %intspecs = (
 my $is64safe = ((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'define') || $Config{longsize}   >= 8 ) &&
                ((defined($Config{uselongdouble}) && $Config{uselongdouble} eq 'define') || $Config{doublesize} >= 10);
 
-sub new {
-    my $class = shift;
-    my $clipper = $class->_new();
-    $clipper->use_full_coordinate_range(1);
-    return $clipper;
-}
-
 sub offset {
     my ($polygons, $delta, $scale, $jointype, $miterlimit) = @_;
     $scale      ||= 100;
@@ -162,6 +155,9 @@ sub integerize_coordinate_sets {
 
     return \@scale_vector;
     }
+
+# keep this method as a no-op, as it was removed in Clipper 4.5.5
+sub use_full_coordinate_range {}
 
 1;
 __END__
@@ -305,27 +301,6 @@ L<NONZERO vs. EVENODD> section below.
 
 Constructor that takes no arguments returns a new
 C<Math::Clipper> object.
-
-=head2 use_full_coordinate_range
-
-Clipper uses either 32 bit or 64 bit integers internally. As of version 4.3.0, 64 bit integer math is used by default.
-
-Pass true to C<use_full_coordinate_range> to tell Clipper to use 64 bit math internally. 
-Pass false to tell Clipper to use 32 bit math.
-
-    $clipper->use_full_coordinate_range(0); # use 32 bit math
-
-A typical Perl that supports 32 bit integers, can alternatively store 53 bit integers as floating point 
-numbers. Some Perls are built to support 64 bit integers directly. To use the full range of either 53 
-bit or 64 bit integers, pass "true" to the  C<use_full_coordinate_range> method.
-
-    $clipper->use_full_coordinate_range(1); # default for Clipper 4.3.0
-
-This will cost you a bit of time ( perhaps 15% more) but will give you the full signed integer range for your coordinates. For 64 bit, that's +/-9,223,372,036,854,775,807. For 53 bit it's +/-9,007,199,254,740,992.
-
-When 64 bit math is not enabled within Clipper, coordinate values will be limited to +/-1,500,000,000.
-
-Call this method before doing anything else with your new Clipper object.
 
 =head2 add_subject_polygon
 
@@ -494,6 +469,17 @@ program works with an inverted Y axis (for example, dealing with SVG), the retur
 C<is_counter_clockwise()> must be inverted: clockwise polygons become counter-clockwise and
 viceversa.
 
+=head1 64 BIT SUPPORT
+
+Clipper uses 64 bit integers internally.
+
+A typical Perl that supports 32 bit integers, can alternatively store 53 bit integers as floating point 
+numbers. Some Perls are built to support 64 bit integers directly. Clipper will use the full range of 
+either 53 bit or 64 bit integers.
+
+This will give you the full signed integer range for your coordinates. For 64 bit, that's 
++/-9,223,372,036,854,775,807. For 53 bit it's +/-9,007,199,254,740,992.
+
 =head1 NONZERO vs. EVENODD
 
 Consider the following example:
@@ -537,7 +523,7 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 4.4.4.
+This module was built around, and includes, Clipper version 4.5.5.
 
 =head1 AUTHOR
 

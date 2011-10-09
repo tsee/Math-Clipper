@@ -1,5 +1,9 @@
 Revision history for Perl extension Math::Clipper.
 
+  - Upgraded the Clipper library to the newest available version 4.5.5.
+    use_full_coordinate_range is always enabled by default, so we now 
+    provide this method for legacy purposes but it's actually a no-op.
+  
   - Removed warning from integerize_coordinate_sets().
 
 1.01  Mon Oct 03 09:15:00 2011

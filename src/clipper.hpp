@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  4.4.4                                                           *
-* Date      :  4 September 2011                                                *
+* Version   :  4.5.5                                                           *
+* Date      :  6 October 2011                                                  *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2011                                         *
 *                                                                              *
@@ -67,10 +67,10 @@ typedef std::vector< ExPolygon > ExPolygons;
 
 enum JoinType { jtSquare, jtMiter, jtRound };
 
-bool IsClockwise(const Polygon &poly, bool UseFullInt64Range = true);
-double Area(const Polygon &poly, bool UseFullInt64Range = true);
+bool Orientation(const Polygon &poly);
+double Area(const Polygon &poly);
 void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
-  double delta, JoinType jointype, double MiterLimit = 2);
+  double delta, JoinType jointype = jtSquare, double MiterLimit = 2);
 
 void ReversePoints(Polygon& p);
 void ReversePoints(Polygons& p);
@@ -175,8 +175,6 @@ public:
   bool AddPolygons( const Polygons &ppg, PolyType polyType);
   virtual void Clear();
   IntRect GetBounds();
-  bool UseFullCoordinateRange() {return m_UseFullRange;}; //default = false
-  void UseFullCoordinateRange(bool newVal);
 protected:
   void DisposeLocalMinimaList();
   TEdge* AddBoundsToLML(TEdge *e);
@@ -203,6 +201,8 @@ public:
     PolyFillType subjFillType = pftEvenOdd,
     PolyFillType clipFillType = pftEvenOdd);
   void Clear();
+  bool ReverseSolution() {return m_ReverseOutput;};
+  void ReverseSolution(bool value) {m_ReverseOutput = value;};
 protected:
   void Reset();
   virtual bool ExecuteInternal(bool fixHoleLinkages);
@@ -218,6 +218,7 @@ private:
   bool              m_ExecuteLocked;
   PolyFillType      m_ClipFillType;
   PolyFillType      m_SubjFillType;
+  bool              m_ReverseOutput;
   void DisposeScanbeamList();
   void SetWindingCount(TEdge& edge);
   bool IsNonZeroFillType(const TEdge& edge) const;
@@ -249,7 +250,7 @@ private:
   OutRec* CreateOutRec();
   void AddOutPt(TEdge *e, TEdge *altE, const IntPoint &pt);
   void DisposeAllPolyPts();
-  void DisposeOutRec(int index, bool ignorePts = false);
+  void DisposeOutRec(PolyOutList::size_type index, bool ignorePts = false);
   bool ProcessIntersections(const long64 botY, const long64 topY);
   void AddIntersectNode(TEdge *e1, TEdge *e2, const IntPoint &pt);
   void BuildIntersectList(const long64 botY, const long64 topY);
@@ -263,11 +264,13 @@ private:
   void FixupOutPolygon(OutRec &outRec);
   bool IsHole(TEdge *e);
   void FixHoleLinkage(OutRec *outRec);
+  void CheckHoleLinkages1(OutRec *outRec1, OutRec *outRec2);
+  void CheckHoleLinkages2(OutRec *outRec1, OutRec *outRec2);
   void AddJoin(TEdge *e1, TEdge *e2, int e1OutIdx = -1, int e2OutIdx = -1);
   void ClearJoins();
   void AddHorzJoin(TEdge *e, int idx);
   void ClearHorzJoins();
-  void JoinCommonEdges();
+  void JoinCommonEdges(bool fixHoleLinkages);
 };
 
 //------------------------------------------------------------------------------
@@ -276,12 +279,11 @@ private:
 class clipperException : public std::exception
 {
   public:
-    clipperException(const char* description)
-      throw(): std::exception(), m_description (description) {}
+    clipperException(const char* description): m_descr(description) {}
     virtual ~clipperException() throw() {}
-    virtual const char* what() const throw() {return m_description.c_str();}
+    virtual const char* what() const throw() {return m_descr.c_str();}
   private:
-    std::string m_description;
+    std::string m_descr;
 };
 //------------------------------------------------------------------------------
 

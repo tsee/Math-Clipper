@@ -30,9 +30,8 @@ _constant()
 
 %name{Math::Clipper}
 class Clipper {
-  %name{_new} Clipper();
+  Clipper();
   ~Clipper();
-  %name{use_full_coordinate_range} void UseFullCoordinateRange(bool newVal);
 
 %{
 ClipperLib::Polygons*
@@ -111,19 +110,17 @@ add_clip_polygons(self, polys)
 %{
 
 double
-is_counter_clockwise(polygon, UseFullInt64Range = 1)
+is_counter_clockwise(polygon)
     ClipperLib::Polygon* polygon
-    bool UseFullInt64Range
   CODE:
-    RETVAL = ClipperLib::IsClockwise(*polygon, UseFullInt64Range);
+    RETVAL = ClipperLib::Orientation(*polygon);
   OUTPUT: RETVAL
 
 double
-area(polygon, UseFullInt64Range = 1)
+area(polygon)
     ClipperLib::Polygon* polygon
-    bool UseFullInt64Range
   CODE:
-    RETVAL = ClipperLib::Area(*polygon, UseFullInt64Range);
+    RETVAL = ClipperLib::Area(*polygon);
   OUTPUT: RETVAL
 
 ClipperLib::Polygons*
