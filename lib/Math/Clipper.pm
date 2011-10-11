@@ -51,7 +51,7 @@ my $is64safe = ((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'd
 sub offset {
     my ($polygons, $delta, $scale, $jointype, $miterlimit) = @_;
     $scale      ||= 100;
-	$jointype   ||= JT_MITER;
+	$jointype   = JT_MITER if !defined $jointype;
 	$miterlimit ||= 2;
 	
 	my $scalevec=[$scale,$scale];
