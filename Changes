@@ -1,5 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
+1.02  Tue Oct 11 16:36:00 2011
+
   - Upgraded the Clipper library to the newest available version 4.5.5.
     use_full_coordinate_range is always enabled by default, so we now 
     provide this method for legacy purposes but it's actually a no-op.

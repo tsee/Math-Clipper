@@ -5,6 +5,9 @@ use Module::Build::WithXSpp;
 my $build = Module::Build::WithXSpp->new(
   module_name     => 'Math::Clipper',
   license         => 'perl',
+  configure_requires  => {
+      'Module::Build'  => '0.38',
+  },
   build_requires  => {
       'Test::Deep'  => '0',
   },
