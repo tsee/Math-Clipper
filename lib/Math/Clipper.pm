@@ -159,6 +159,8 @@ sub integerize_coordinate_sets {
 # keep this method as a no-op, as it was removed in Clipper 4.5.5
 sub use_full_coordinate_range {}
 
+sub CLONE_SKIP { 1 }
+
 1;
 __END__
 
