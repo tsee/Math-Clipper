@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Clipper.
 
+1.03  Sat Jan 28 16:39:43 2012
+
+  - Added a sub CLONE_SKIP { 1 } to make the module thread-safe in its
+    basic form
+
 1.02  Tue Oct 11 16:36:00 2011
 
   - Upgraded the Clipper library to the newest available version 4.5.5.
