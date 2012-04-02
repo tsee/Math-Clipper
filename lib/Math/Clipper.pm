@@ -23,7 +23,7 @@ our %EXPORT_TAGS = (
     #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
-    utilities => [qw/area offset is_counter_clockwise integerize_coordinate_sets unscale_coordinate_sets/],
+    utilities => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets/],
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
@@ -60,6 +60,8 @@ sub offset {
 	unscale_coordinate_sets($scalevec , $ret) if @$ret;
 	return $ret;
 	}
+
+*is_counter_clockwise = *orientation;
 
 sub unscale_coordinate_sets { # to undo what integerize_coordinate_sets() does
     my $scale_vector=shift;
@@ -458,18 +460,22 @@ Coordinate data should be integers.
 
     $area = area($polygon);
 
-=head2 is_counter_clockwise
+=head2 orientation
 
-Determine if a polygon is wound counter clockwise. Returns true if it is, false if it isn't. Coordinate data should be integers.
+Determine the winding order of a polygon. It returns a true value if the polygon is counter-clockwise
+B<and> you're assuming a display where the Y-axis coordinates are positive I<upward>, or if the polygon 
+is clockwise and you're assuming a positive-downward Y-axis. Coordinate data should be integers.
+The majority of 2D graphic display libraries have their origin (0,0) at the top left corner, thus Y
+increases downward; however some libraries (Quartz, OpenGL) as well as non-display applications (CNC)
+assume Y increases upward.
 
-    $poly = [ [0, 0] , [2, 0] , [1, 1] ]; # a counter clockwise wound polygon
-    $direction = is_counter_clockwise($poly);
+    my $poly = [ [0, 0] , [2, 0] , [1, 1] ]; # a counter clockwise wound polygon (assuming Y upward)
+    my $direction = orientation($poly);
     # now $direction == 1
 
-Note that Math::Clipper assumes a coordinate system where the Y axis increases upward. If your
-program works with an inverted Y axis (for example, dealing with SVG), the return value of 
-C<is_counter_clockwise()> must be inverted: clockwise polygons become counter-clockwise and
-viceversa.
+This function was previously named C<is_counter_clockwise()>. This symbol is still exported for backwards
+compatibility; however you're encouraged to switch it to C<orientation()> as the underlying Clipper
+library switched to it too to clarify the Y axis convention issue.
 
 =head1 64 BIT SUPPORT
 

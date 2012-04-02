@@ -1,5 +1,8 @@
 Revision history for Perl extension Math::Clipper.
 
+  - Renamed is_counter_clockwise() to orientation() (the former is still
+    exported for backwards compatibility).
+
 1.05  Sun Mar 11 19:06:00 2012
 
   - Releasing again, since the 1.04 release got out broken probably.
