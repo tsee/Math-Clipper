@@ -23,7 +23,8 @@ our %EXPORT_TAGS = (
     #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
-    utilities => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets/],
+    utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
+                    simplify_polygon simplify_polygons/],
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
@@ -476,6 +477,13 @@ assume Y increases upward.
 This function was previously named C<is_counter_clockwise()>. This symbol is still exported for backwards
 compatibility; however you're encouraged to switch it to C<orientation()> as the underlying Clipper
 library switched to it too to clarify the Y axis convention issue.
+
+=head2 simplify_polygon
+=head2 simplify_polygons
+
+These functions convert self-intersecting polygons (known as I<complex> polygons) to I<simple>
+polygons. C<simplify_polygon()> takes a single polygon as argument, while C<simplify_polygons()>
+takes multiple polygons in a single arrayref. Both return an arrayref of polygons.
 
 =head1 64 BIT SUPPORT
 

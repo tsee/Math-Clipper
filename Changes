@@ -1,5 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
+  - new simplify_polygon() and simplify_polygons() functions
+
   - Renamed is_counter_clockwise() to orientation() (the former is still
     exported for backwards compatibility).
 

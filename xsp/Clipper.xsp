@@ -128,6 +128,24 @@ _offset(polygons, delta, jointype, MiterLimit)
     ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
   OUTPUT:
     RETVAL
+
+ClipperLib::Polygons*
+simplify_polygon(polygon)
+    ClipperLib::Polygon* polygon
+  CODE:
+    RETVAL = new ClipperLib::Polygons();
+    ClipperLib::SimplifyPolygon(*polygon, *RETVAL);
+  OUTPUT:
+    RETVAL
+
+ClipperLib::Polygons*
+simplify_polygons(polygons)
+    ClipperLib::Polygons* polygons
+  CODE:
+    RETVAL = new ClipperLib::Polygons();
+    ClipperLib::SimplifyPolygons(*polygons, *RETVAL);
+  OUTPUT:
+    RETVAL
 %}
 
   %name{clear}

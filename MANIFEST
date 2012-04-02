@@ -18,6 +18,7 @@ t/006winding.t
 t/007usefullrange.t
 t/008integerize.t
 t/009expolygon.t
+t/010simplify.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
