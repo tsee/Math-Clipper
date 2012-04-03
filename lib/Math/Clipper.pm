@@ -539,7 +539,7 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 4.7.3.
+This module was built around, and includes, Clipper version 4.7.5.
 
 =head1 AUTHOR
 
