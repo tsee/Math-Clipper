@@ -335,7 +335,7 @@ Returns the result as a reference to an array of polygons.
     my $result = $clipper->execute( CT_UNION );
 
 Parameters: the type of the clipping operation defined
-by one of the constants (C<CF_*>).
+by one of the constants (C<CT_*>).
 
 Additionally, you may define the polygon fill types (C<PFT_*>)
 of the subject and clipping polygons as second and third parameters
