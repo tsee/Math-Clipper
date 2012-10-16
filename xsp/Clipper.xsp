@@ -130,20 +130,22 @@ _offset(polygons, delta, jointype, MiterLimit)
     RETVAL
 
 ClipperLib::Polygons*
-simplify_polygon(polygon)
+simplify_polygon(polygon, fillType)
     ClipperLib::Polygon* polygon
+    PolyFillType fillType
   CODE:
     RETVAL = new ClipperLib::Polygons();
-    ClipperLib::SimplifyPolygon(*polygon, *RETVAL);
+    ClipperLib::SimplifyPolygon(*polygon, *RETVAL, fillType);
   OUTPUT:
     RETVAL
 
 ClipperLib::Polygons*
-simplify_polygons(polygons)
+simplify_polygons(polygons, fillType)
     ClipperLib::Polygons* polygons
+    PolyFillType fillType
   CODE:
     RETVAL = new ClipperLib::Polygons();
-    ClipperLib::SimplifyPolygons(*polygons, *RETVAL);
+    ClipperLib::SimplifyPolygons(*polygons, *RETVAL, fillType);
   OUTPUT:
     RETVAL
 %}

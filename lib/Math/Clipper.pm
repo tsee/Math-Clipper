@@ -12,7 +12,7 @@ our @ISA = qw(Exporter);
 
 BEGIN {
     use XSLoader;
-    $VERSION = '1.09';
+    $VERSION = '1.10';
     XSLoader::load('Math::Clipper', $VERSION);
 }
 
@@ -482,8 +482,9 @@ library switched to it too to clarify the Y axis convention issue.
 =head2 simplify_polygons
 
 These functions convert self-intersecting polygons (known as I<complex> polygons) to I<simple>
-polygons. C<simplify_polygon()> takes a single polygon as argument, while C<simplify_polygons()>
-takes multiple polygons in a single arrayref. Both return an arrayref of polygons.
+polygons. C<simplify_polygon()> takes a single polygon as first argument, while C<simplify_polygons()>
+takes multiple polygons in a single arrayref. The second argument must be a polyfilltype constant 
+(PFT_*, see above). Both return an arrayref of polygons.
 
 =head1 64 BIT SUPPORT
 
@@ -539,7 +540,7 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 4.8.4.
+This module was built around, and includes, Clipper version 4.8.8.
 
 =head1 AUTHOR
 
