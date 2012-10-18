@@ -33,7 +33,7 @@ our @EXPORT = qw();
 
 my %intspecs = (
     '64' => {
-            maxint    => 9223372036854775806,   # signed 64 bit int range: -9223372036854775808 to 9223372036854775807; BUT Clipper seems to only work up to 9223372036854775806
+            maxint    => 4611686018427387902,   # Clipper-imposed max when using 64 bit integer math
             maxdigits => 19
             },
     '53' => {
@@ -41,7 +41,7 @@ my %intspecs = (
             maxdigits => 16
             },
     '32' => {
-            maxint    => 1500000000,   # Clipper-imposed max when 64 bit integer math not enabled
+            maxint    => 1073741822,   # Clipper-imposed max to avoid calculations with large integer types
             maxdigits => 10
             },
     );
@@ -214,7 +214,6 @@ Math::Clipper - Polygon clipping in 2D
  # Example using 32 bit integer math instead of the default 53 or 64
  # (less precision, a bit faster)
  my $clipper32 = Math::Clipper->new;
- $clipper32->use_full_coordinate_range(0);
  my $scale32 = integerize_coordinate_sets( { bits=>32 } , $poly_1 , $poly_2 );
  $clipper32->add_subject_polygon( $poly_1 );
  $clipper32->add_clip_polygon(    $poly_2 );
@@ -386,7 +385,7 @@ If the first argument is not a hash reference, it is taken instead as the first 
 
     my $scale_vector = integerize_coordinate_sets( {
                                                     constrain => 0, # don't do uniform scaling
-                                                    bits => 32     # use the +/- 1,500,000,000 integer range
+                                                    bits => 32     # use the +/-1,073,741,822 integer range
                                                     },
                                                     $poly1 , $poly2 , $poly3
                                                  );
@@ -395,8 +394,8 @@ The C<bits> option can be 32, 53, or 64. The default will be 53 or 64, depending
 Perl uses 64 bit integers AND long doubles by default. (The scaling involves math with native doubles,
 so it's not enough to just have 64 bit integers.)
 
-Be sure to set the C<bits> option to 32 when you have told Clipper
-to use 32 bit integer math internally, using the C<use_full_coordinate_range> method.
+Setting the C<bits> option to 32 may provide a modest speed boost, by allowing Clipper to 
+avoid calculations with large integer types.
 
 The C<constrain> option is a boolean. Default is true. When set to false, each
 column of coordinates (X, Y) will be scaled independently. This may be useful
@@ -486,16 +485,19 @@ polygons. C<simplify_polygon()> takes a single polygon as first argument, while 
 takes multiple polygons in a single arrayref. The second argument must be a polyfilltype constant 
 (PFT_*, see above). Both return an arrayref of polygons.
 
-=head1 64 BIT SUPPORT
+=head1 MAXIMUM COORDINATE VALUES AND 64 BIT SUPPORT
 
-Clipper uses 64 bit integers internally.
+Clipper accepts 64 bit integer input, but limits the domain of input coordinate values
+to +/-4,611,686,018,427,387,902, to allow enough overhead for certain calculations.
+Coordinate values up to these limits are possible with Perls built to support 64 bit integers.
 
-A typical Perl that supports 32 bit integers, can alternatively store 53 bit integers as floating point 
-numbers. Some Perls are built to support 64 bit integers directly. Clipper will use the full range of 
-either 53 bit or 64 bit integers.
+A typical Perl that supports 32 bit integers can alternatively store 53 bit integers as floating point 
+numbers. In this case, the coordinate domain is limited to +/-9,007,199,254,740,992.
 
-This will give you the full signed integer range for your coordinates. For 64 bit, that's 
-+/-9,223,372,036,854,775,807. For 53 bit it's +/-9,007,199,254,740,992.
+When optionally constraining coordinate values to 32 bit integers, the domain is +/-1,073,741,822.
+
+The C<integerize_coordinate_sets> utility function automatically respects whichever limit applies to
+your Perl build.
 
 =head1 NONZERO vs. EVENODD
 

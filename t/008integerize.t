@@ -5,7 +5,7 @@ use Test::Deep;
 
 my $diagnostics=0;
 
-my $maxint_64 =9223372036854775806; # signed 64 bit int range: -9223372036854775808 to 9223372036854775807; BUT Clipper seems to only work up to 9223372036854775806
+my $maxint_64 =4611686018427387902; # Clipper-imposed max (minus 1) when using 64 bit integer math
 my $maxint_53 =   9007199254740992; # for integers stored in double precision floats with 53 bit mantissa
 my $maxint;
 

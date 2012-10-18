@@ -3,6 +3,7 @@ Revision history for Perl extension Math::Clipper.
 1.10  Tue Oct 16 17:39:00 2012
 
   - Upgraded the Clipper library to the newest available version 4.8.8.
+  - Reduced 32 bit and 64 bit max integer limits introduced in 4.8.6.
 
 1.08  Mon May 28 19:16:00 2012
 
