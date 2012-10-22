@@ -12,7 +12,7 @@ our @ISA = qw(Exporter);
 
 BEGIN {
     use XSLoader;
-    $VERSION = '1.10';
+    $VERSION = '1.11';
     XSLoader::load('Math::Clipper', $VERSION);
 }
 
