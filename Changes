@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Clipper.
 
+1.12  Tue Oct 30 01:09:00 2012
+
+  - Fixed Int128 comparison operators in Clipper library, which could 
+    cause wrong orientations.
+
 1.11  Mon Oct 22 14:33:00 2012
 
   - Reduced 32 bit and 64 bit max integer limits introduced in 4.8.6.

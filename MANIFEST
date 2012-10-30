@@ -19,6 +19,7 @@ t/007usefullrange.t
 t/008integerize.t
 t/009expolygon.t
 t/010simplify.t
+t/011Int128Comparison.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
