@@ -102,16 +102,20 @@ class Int128
     {
       if (hi != val.hi)
         return hi > val.hi;
+      else if (hi < 0) 
+        return ulong64(lo) < ulong64(val.lo);
       else
-        return lo > val.lo;
+        return ulong64(lo) > ulong64(val.lo);
     }
 
     bool operator < (const Int128 &val) const
     {
       if (hi != val.hi)
         return hi < val.hi;
+      else if (hi < 0)
+        return ulong64(lo) > ulong64(val.lo);
       else
-        return lo < val.lo;
+        return ulong64(lo) < ulong64(val.lo);
     }
 
     bool operator >= (const Int128 &val) const
@@ -225,18 +229,17 @@ class Int128
     double AsDouble() const
     {
       const double shift64 = 18446744073709551616.0; //2^64
-      const double bit64 = 9223372036854775808.0;
       if (hi < 0)
       {
         Int128 tmp(*this);
         Negate(tmp);
         if (tmp.lo < 0)
-          return (double)tmp.lo - bit64 - tmp.hi * shift64;
+          return -(double)ulong64(lo)  - tmp.hi * shift64;
         else
           return -(double)tmp.lo - tmp.hi * shift64;
       }
       else if (lo < 0)
-        return -(double)lo + bit64 + hi * shift64;
+        return (double)ulong64(lo) + hi * shift64;
       else
         return (double)lo + (double)hi * shift64;
     }
