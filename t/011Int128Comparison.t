@@ -26,8 +26,8 @@ my $p1 = [
 ];
 
 my $winding_before = Math::Clipper::orientation($p1);
-my $offset = Math::Clipper::offset([$p1], -10000000000, 1);
-my $winding_after = Math::Clipper::orientation($offset);
+my $offsets = Math::Clipper::offset([$p1], -10000000000, 1);
+my $winding_after = Math::Clipper::orientation($offsets->[0]);
 
 ok($winding_before eq $winding_after, "http://sourceforge.net/p/polyclipping/bugs/47/");
 
