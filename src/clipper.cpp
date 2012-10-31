@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  4.8.8                                                           *
-* Date      :  30 August 2012                                                  *
+* Version   :  4.9.3                                                           *
+* Date      :  1 November 2012                                                 *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2012                                         *
 *                                                                              *
@@ -102,8 +102,6 @@ class Int128
     {
       if (hi != val.hi)
         return hi > val.hi;
-      else if (hi < 0) 
-        return ulong64(lo) < ulong64(val.lo);
       else
         return ulong64(lo) > ulong64(val.lo);
     }
@@ -112,8 +110,6 @@ class Int128
     {
       if (hi != val.hi)
         return hi < val.hi;
-      else if (hi < 0)
-        return ulong64(lo) > ulong64(val.lo);
       else
         return ulong64(lo) < ulong64(val.lo);
     }
@@ -231,17 +227,13 @@ class Int128
       const double shift64 = 18446744073709551616.0; //2^64
       if (hi < 0)
       {
-        Int128 tmp(*this);
-        Negate(tmp);
-        if (tmp.lo < 0)
-          return -(double)ulong64(lo)  - tmp.hi * shift64;
+        if (lo == 0)
+            return (double)hi * shift64;
         else
-          return -(double)tmp.lo - tmp.hi * shift64;
+          return -(double)(ulong64(-lo) + ~hi * shift64);
       }
-      else if (lo < 0)
-        return (double)ulong64(lo) + hi * shift64;
       else
-        return (double)lo + (double)hi * shift64;
+        return (double)(ulong64(lo) + hi * shift64);
     }
 
     //for bug testing ...
@@ -358,7 +350,7 @@ bool Orientation(const Polygon &poly)
         throw "Coordinate exceeds range bounds.";
     Int128 cross = Int128(vec1.X) * Int128(vec2.Y) -
       Int128(vec2.X) * Int128(vec1.Y);
-    return cross >= 0;
+    return (cross >= 0);
   }
   else
     return (vec1.X * vec2.Y - vec2.X * vec1.Y) >= 0;
@@ -506,10 +498,9 @@ bool PointInPolygon(const IntPoint &pt, OutPt *pp, bool UseFullInt64Range)
 bool SlopesEqual(TEdge &e1, TEdge &e2, bool UseFullInt64Range)
 {
   if (UseFullInt64Range)
-    return Int128(e1.ytop - e1.ybot) * Int128(e2.xtop - e2.xbot) ==
-      Int128(e1.xtop - e1.xbot) * Int128(e2.ytop - e2.ybot);
-  else return (e1.ytop - e1.ybot)*(e2.xtop - e2.xbot) ==
-      (e1.xtop - e1.xbot)*(e2.ytop - e2.ybot);
+    return Int128(e1.deltaY) * Int128(e2.deltaX) ==
+      Int128(e1.deltaX) * Int128(e2.deltaY);
+  else return e1.deltaY * e2.deltaX == e1.deltaX * e2.deltaY;
 }
 //------------------------------------------------------------------------------
 
@@ -542,8 +533,11 @@ double GetDx(const IntPoint pt1, const IntPoint pt2)
 
 void SetDx(TEdge &e)
 {
-  if (e.ybot == e.ytop) e.dx = HORIZONTAL;
-  else e.dx = (double)(e.xtop - e.xbot) / (double)(e.ytop - e.ybot);
+  e.deltaX = (e.xtop - e.xbot);
+  e.deltaY = (e.ytop - e.ybot);
+
+  if (e.deltaY == 0) e.dx = HORIZONTAL;
+  else e.dx = (double)(e.deltaX) / (double)(e.deltaY);
 }
 //---------------------------------------------------------------------------
 
@@ -565,8 +559,7 @@ void SwapPolyIndexes(TEdge &edge1, TEdge &edge2)
 
 inline long64 Round(double val)
 {
-  return (val < 0) ?
-    static_cast<long64>(val - 0.5) : static_cast<long64>(val + 0.5);
+  return (val < 0) ? static_cast<long64>(val - 0.5) : static_cast<long64>(val + 0.5);
 }
 //------------------------------------------------------------------------------
 
@@ -628,11 +621,22 @@ bool IntersectPoint(TEdge &edge1, TEdge &edge2,
     ip.X = Round(edge1.dx * b2 + b1);
   }
 
-  return
-    //can be *so close* to the top of one edge that the rounded Y equals one ytop ...
-    (ip.Y == edge1.ytop && ip.Y >= edge2.ytop && edge1.tmpX > edge2.tmpX) ||
-    (ip.Y == edge2.ytop && ip.Y >= edge1.ytop && edge1.tmpX > edge2.tmpX) ||
-    (ip.Y > edge1.ytop && ip.Y > edge2.ytop);
+  if (ip.Y < edge1.ytop || ip.Y < edge2.ytop) 
+  {
+    if (edge1.ytop > edge2.ytop)
+    {
+      ip.X = edge1.xtop;
+      ip.Y = edge1.ytop;
+      return TopX(edge2, edge1.ytop) < edge1.xtop;
+    } else
+    {
+      ip.X = edge2.xtop;
+      ip.Y = edge2.ytop;
+      return TopX(edge1, edge2.ytop) > edge2.xtop;
+    }
+  } 
+  else 
+    return true;
 }
 //------------------------------------------------------------------------------
 
@@ -2127,12 +2131,13 @@ void Clipper::AddOutPt(TEdge *e, const IntPoint &pt)
     {
       //check for 'rounding' artefacts ...
       if (outRec->sides == esNeither && pt.Y == op->pt.Y)
+      {
         if (ToFront)
         {
           if (pt.X == op->pt.X +1) return;    //ie wrong side of bottomPt
         }
         else if (pt.X == op->pt.X -1) return; //ie wrong side of bottomPt
-
+      }
       outRec->sides = (EdgeSide)(outRec->sides | e->side);
       if (outRec->sides == esBoth)
       {
@@ -2633,10 +2638,10 @@ void Clipper::ProcessEdgesAtTopOfScanbeam(const long64 topY)
     if( IsMaxima(e, topY) && !NEAR_EQUAL(GetMaximaPair(e)->dx, HORIZONTAL) )
     {
       //'e' might be removed from AEL, as may any following edges so ...
-      TEdge* ePrior = e->prevInAEL;
+      TEdge* ePrev = e->prevInAEL;
       DoMaxima(e, topY);
-      if( !ePrior ) e = m_ActiveEdges;
-      else e = ePrior->nextInAEL;
+      if( !ePrev ) e = m_ActiveEdges;
+      else e = ePrev->nextInAEL;
     }
     else
     {
@@ -2685,25 +2690,23 @@ void Clipper::ProcessEdgesAtTopOfScanbeam(const long64 topY)
       UpdateEdgeIntoAEL(e);
 
       //if output polygons share an edge, they'll need joining later ...
-      if (e->outIdx >= 0 && e->prevInAEL && e->prevInAEL->outIdx >= 0 &&
-        e->prevInAEL->xcurr == e->xbot && e->prevInAEL->ycurr == e->ybot &&
-        SlopesEqual(IntPoint(e->xbot,e->ybot), IntPoint(e->xtop, e->ytop),
-          IntPoint(e->xbot,e->ybot),
-          IntPoint(e->prevInAEL->xtop, e->prevInAEL->ytop), m_UseFullRange))
+      TEdge* ePrev = e->prevInAEL;
+      TEdge* eNext = e->nextInAEL;
+      if (ePrev && ePrev->xcurr == e->xbot &&
+        ePrev->ycurr == e->ybot && e->outIdx >= 0 &&
+        ePrev->outIdx >= 0 && ePrev->ycurr > ePrev->ytop &&
+        SlopesEqual(*e, *ePrev, m_UseFullRange))
       {
-        AddOutPt(e->prevInAEL, IntPoint(e->xbot, e->ybot));
-        AddJoin(e, e->prevInAEL);
+        AddOutPt(ePrev, IntPoint(e->xbot, e->ybot));
+        AddJoin(e, ePrev);
       }
-      else if (e->outIdx >= 0 && e->nextInAEL && e->nextInAEL->outIdx >= 0 &&
-        e->nextInAEL->ycurr > e->nextInAEL->ytop &&
-        e->nextInAEL->ycurr <= e->nextInAEL->ybot &&
-        e->nextInAEL->xcurr == e->xbot && e->nextInAEL->ycurr == e->ybot &&
-        SlopesEqual(IntPoint(e->xbot,e->ybot), IntPoint(e->xtop, e->ytop),
-          IntPoint(e->xbot,e->ybot),
-          IntPoint(e->nextInAEL->xtop, e->nextInAEL->ytop), m_UseFullRange))
+      else if (eNext && eNext->xcurr == e->xbot &&
+        eNext->ycurr == e->ybot && e->outIdx >= 0 &&
+        eNext->outIdx >= 0 && eNext->ycurr > eNext->ytop &&
+        SlopesEqual(*e, *eNext, m_UseFullRange))
       {
-        AddOutPt(e->nextInAEL, IntPoint(e->xbot, e->ybot));
-        AddJoin(e, e->nextInAEL);
+        AddOutPt(eNext, IntPoint(e->xbot, e->ybot));
+        AddJoin(e, eNext);
       }
     }
     e = e->nextInAEL;
@@ -2932,30 +2935,6 @@ void Clipper::DoBothEdges(TEdge *edge1, TEdge *edge2, const IntPoint &pt)
 }
 //----------------------------------------------------------------------
 
-void Clipper::CheckHoleLinkages1(OutRec *outRec1, OutRec *outRec2)
-{
-  //when a polygon is split into 2 polygons, make sure any holes the original
-  //polygon contained link to the correct polygon ...
-  for (PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i)
-  {
-    OutRec *orec = m_PolyOuts[i];
-    if (orec->isHole && orec->bottomPt && orec->FirstLeft == outRec1 &&
-      !PointInPolygon(orec->bottomPt->pt, outRec1->pts, m_UseFullRange))
-        orec->FirstLeft = outRec2;
-  }
-}
-//----------------------------------------------------------------------
-
-void Clipper::CheckHoleLinkages2(OutRec *outRec1, OutRec *outRec2)
-{
-  //if a hole is owned by outRec2 then make it owned by outRec1 ...
-  for (PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i)
-    if (m_PolyOuts[i]->isHole && m_PolyOuts[i]->bottomPt &&
-      m_PolyOuts[i]->FirstLeft == outRec2)
-        m_PolyOuts[i]->FirstLeft = outRec1;
-}
-//----------------------------------------------------------------------
-
 void Clipper::JoinCommonEdges(bool fixHoleLinkages)
 {
   for (JoinList::size_type i = 0; i < m_Joins.size(); i++)
@@ -3041,32 +3020,25 @@ void Clipper::JoinCommonEdges(bool fixHoleLinkages)
       outRec2->bottomPt = outRec2->pts;
       outRec2->bottomPt->idx = outRec2->idx;
 
+      int K = 0;
       if (PointInPolygon(outRec2->pts->pt, outRec1->pts, m_UseFullRange))
       {
         //outRec2 is contained by outRec1 ...
+        K = 1;
         outRec2->isHole = !outRec1->isHole;
         outRec2->FirstLeft = outRec1;
-        if (outRec2->isHole ==
-          (m_ReverseOutput ^ Orientation(outRec2, m_UseFullRange)))
-            ReversePolyPtLinks(*outRec2->pts);
       } else if (PointInPolygon(outRec1->pts->pt, outRec2->pts, m_UseFullRange))
       {
         //outRec1 is contained by outRec2 ...
+        K = 2;
         outRec2->isHole = outRec1->isHole;
         outRec1->isHole = !outRec2->isHole;
         outRec2->FirstLeft = outRec1->FirstLeft;
         outRec1->FirstLeft = outRec2;
-        if (outRec1->isHole ==
-          (m_ReverseOutput ^ Orientation(outRec1, m_UseFullRange)))
-            ReversePolyPtLinks(*outRec1->pts);
-        //make sure any contained holes now link to the correct polygon ...
-        if (fixHoleLinkages) CheckHoleLinkages1(outRec1, outRec2);
       } else
       {
         outRec2->isHole = outRec1->isHole;
         outRec2->FirstLeft = outRec1->FirstLeft;
-        //make sure any contained holes now link to the correct polygon ...
-        if (fixHoleLinkages) CheckHoleLinkages1(outRec1, outRec2);
       }
 
       //now fixup any subsequent joins that match this polygon
@@ -3079,10 +3051,47 @@ void Clipper::JoinCommonEdges(bool fixHoleLinkages)
           j2->poly2Idx = j->poly2Idx;
       }
 
-      //now cleanup redundant edges too ...
-      FixupOutPolygon(*outRec1);
-      FixupOutPolygon(*outRec2);
+      FixupOutPolygon(*outRec1); //nb: do this BEFORE testing orientation
+      FixupOutPolygon(*outRec2); //    but AFTER calling PointIsVertex()
 
+      switch( K ) {
+        case 1: 
+          {
+            if (outRec2->isHole ==
+              (m_ReverseOutput ^ Orientation(outRec2, m_UseFullRange)))
+                ReversePolyPtLinks(*outRec2->pts);
+            break;
+          }
+        case 2: 
+          {
+            if (outRec1->isHole ==
+              (m_ReverseOutput ^ Orientation(outRec1, m_UseFullRange)))
+                ReversePolyPtLinks(*outRec1->pts);
+            //make sure any contained holes now link to the correct polygon ...
+            if (fixHoleLinkages && outRec1->isHole) 
+              for (PolyOutList::size_type k = 0; k < m_PolyOuts.size(); ++k)
+              {
+                OutRec *orec = m_PolyOuts[k];
+                if (orec->isHole && orec->bottomPt && orec->FirstLeft == outRec1)
+                  orec->FirstLeft = outRec2;
+              }
+            break;
+          }
+        default: 
+          {
+            //make sure any contained holes now link to the correct polygon ...
+            if (fixHoleLinkages) 
+              for (PolyOutList::size_type k = 0; k < m_PolyOuts.size(); ++k)
+              {
+                OutRec *orec = m_PolyOuts[k];
+                if (orec->isHole && orec->bottomPt && orec->FirstLeft == outRec1 &&
+                  !PointInPolygon(orec->bottomPt->pt, outRec1->pts, m_UseFullRange))
+                    orec->FirstLeft = outRec2;
+              }
+
+          }
+      }
+     
       if (Orientation(outRec1, m_UseFullRange) != (Area(*outRec1, m_UseFullRange) > 0))
           DisposeBottomPt(*outRec1);
       if (Orientation(outRec2, m_UseFullRange) != (Area(*outRec2, m_UseFullRange) > 0))
@@ -3093,9 +3102,14 @@ void Clipper::JoinCommonEdges(bool fixHoleLinkages)
       //joined 2 polygons together ...
 
       //make sure any holes contained by outRec2 now link to outRec1 ...
-      if (fixHoleLinkages) CheckHoleLinkages2(outRec1, outRec2);
+      if (fixHoleLinkages) 
+        for (PolyOutList::size_type k = 0; k < m_PolyOuts.size(); ++k)
+          if (m_PolyOuts[k]->isHole && m_PolyOuts[k]->bottomPt &&
+            m_PolyOuts[k]->FirstLeft == outRec2)
+              m_PolyOuts[k]->FirstLeft = outRec1;
 
-      //now cleanup redundant edges too ...
+
+      //and cleanup redundant edges too ...
       FixupOutPolygon(*outRec1);
 
       if (outRec1->pts)
