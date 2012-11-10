@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  4.9.4                                                           *
-* Date      :  2 November 2012                                                 *
+* Version   :  4.9.6                                                           *
+* Date      :  9 November 2012                                                 *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2012                                         *
 *                                                                              *
@@ -78,7 +78,7 @@ enum JoinType { jtSquare, jtRound, jtMiter };
 bool Orientation(const Polygon &poly);
 double Area(const Polygon &poly);
 void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
-  double delta, JoinType jointype = jtSquare, double MiterLimit = 2);
+  double delta, JoinType jointype = jtSquare, double MiterLimit = 2, bool CheckInputs = true);
 void SimplifyPolygon(const Polygon &in_poly, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
 void SimplifyPolygons(const Polygons &in_polys, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
 void SimplifyPolygons(Polygons &polys, PolyFillType fillType = pftEvenOdd);
@@ -259,7 +259,7 @@ private:
   void DoEdge2(TEdge *edge1, TEdge *edge2, const IntPoint &pt);
   void DoBothEdges(TEdge *edge1, TEdge *edge2, const IntPoint &pt);
   void IntersectEdges(TEdge *e1, TEdge *e2,
-    const IntPoint &pt, IntersectProtects protects);
+    const IntPoint &pt, const IntersectProtects protects);
   OutRec* CreateOutRec();
   void AddOutPt(TEdge *e, const IntPoint &pt);
   void DisposeBottomPt(OutRec &outRec);
@@ -282,6 +282,8 @@ private:
   void ClearJoins();
   void AddHorzJoin(TEdge *e, int idx);
   void ClearHorzJoins();
+  bool JoinPoints(const JoinRec *j, OutPt *&p1, OutPt *&p2);
+  void FixupJoinRecs(JoinRec *j, OutPt *pt, unsigned startIdx);
   void JoinCommonEdges(bool fixHoleLinkages);
 };
 
