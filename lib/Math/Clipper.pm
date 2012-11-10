@@ -12,7 +12,7 @@ our @ISA = qw(Exporter);
 
 BEGIN {
     use XSLoader;
-    $VERSION = '1.14';
+    $VERSION = '1.15';
     XSLoader::load('Math::Clipper', $VERSION);
 }
 
@@ -542,7 +542,7 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 4.9.4.
+This module was built around, and includes, Clipper version 4.9.6.
 
 =head1 AUTHOR
 
@@ -563,11 +563,13 @@ Copyright (C) 2010, 2011 by Steffen Mueller
 
 Copyright (C) 2011 by Mike Sheldrake
 
+Copyright (C) 2012 by Alessandro Ranellucci and Mike Sheldrake
+
 
 but we are shipping a copy of the C<Clipper> C++ library, which
 is
 
-Copyright (C) 2010, 2011 by Angus Johnson.
+Copyright (C) 2010, 2011, 2012 by Angus Johnson.
 
 C<Math::Clipper> is available under the same
 license as C<Clipper> itself. This is the C<boost> license:
