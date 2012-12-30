@@ -21,7 +21,7 @@ BEGIN {
 our %EXPORT_TAGS = (
     cliptypes     => [qw/CT_INTERSECTION CT_UNION CT_DIFFERENCE CT_XOR/],
     #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
-    polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO/],
+    polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO PFT_POSITIVE PFT_NEGATIVE/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
                     simplify_polygon simplify_polygons/],
@@ -245,6 +245,8 @@ during the clipping operation:
 
     PFT_EVENODD
     PFT_NONZERO
+    PFT_POSITIVE
+    PFT_NEGATIVE
 
 =head1 CONVENTIONS
 
