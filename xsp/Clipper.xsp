@@ -19,6 +19,8 @@ _constant()
     PT_CLIP = ptClip
     PFT_EVENODD = pftEvenOdd
     PFT_NONZERO = pftNonZero
+    PFT_POSITIVE = pftPositive
+    PFT_NEGATIVE = pftNegative
     JT_MITER = jtMiter
     JT_ROUND = jtRound
     JT_SQUARE = jtSquare
