@@ -12,7 +12,7 @@ our @ISA = qw(Exporter);
 
 BEGIN {
     use XSLoader;
-    $VERSION = '1.16';
+    $VERSION = '1.17';
     XSLoader::load('Math::Clipper', $VERSION);
 }
 
@@ -565,7 +565,7 @@ Copyright (C) 2010, 2011 by Steffen Mueller
 
 Copyright (C) 2011 by Mike Sheldrake
 
-Copyright (C) 2012 by Alessandro Ranellucci and Mike Sheldrake
+Copyright (C) 2012, 2013 by Alessandro Ranellucci and Mike Sheldrake
 
 
 but we are shipping a copy of the C<Clipper> C++ library, which
