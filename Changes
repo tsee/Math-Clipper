@@ -1,6 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
   - Expose PFT_POSITIVE and PFT_NEGATIVE constants.
+  - Upgraded the Clipper library to the newest available version 5.0.3.
 
 1.16  Wed Dec 26 15:29:00 2012
 
