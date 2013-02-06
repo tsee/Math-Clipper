@@ -51,16 +51,15 @@ my $is64safe = ((defined($Config{use64bitint})   && $Config{use64bitint}   eq 'd
 
 sub offset {
     my ($polygons, $delta, $scale, $jointype, $miterlimit) = @_;
-    $scale      ||= 100;
-	$jointype   = JT_MITER if !defined $jointype;
-	$miterlimit ||= 2;
 	
-	my $scalevec=[$scale,$scale];
-	my $polyscopy=[(map {[(map {[(map {$_*$scalevec->[0]} @{$_})]} @{$_})]} @{$polygons})];
-	my $ret = _offset($polyscopy,$delta*$scale, $jointype, $miterlimit);
-	unscale_coordinate_sets($scalevec , $ret) if @$ret;
-	return $ret;
-	}
+	return _offset(
+	    $polygons,
+	    $delta,
+	    ($scale || 100),
+	    (defined $jointype ? $jointype : JT_MITER),
+	    ($miterlimit || 2),
+	);
+}
 
 *is_counter_clockwise = *orientation;
 
