@@ -120,34 +120,14 @@ area(polygon)
   OUTPUT: RETVAL
 
 ClipperLib::Polygons*
-_offset(polygons, delta, scale, jointype, MiterLimit)
+_offset(polygons, delta, jointype, MiterLimit)
     ClipperLib::Polygons* polygons
     const float delta
-    const double scale
     JoinType jointype
     const double MiterLimit
   CODE:
-    // scale
-    for (Polygons::size_type i = 0; i != (*polygons).size(); i++) {
-        ClipperLib::Polygon* mypoly = &(*polygons)[i];
-        for (Polygon::size_type j = 0; j != (*mypoly).size(); j++) {
-            (*mypoly)[j].X *= scale;
-            (*mypoly)[j].Y *= scale;
-        }
-    }
-    
-    // perform offset
     RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*polygons, *RETVAL, (delta*scale), jointype, MiterLimit);
-    
-    // unscale
-    for (Polygons::size_type i = 0; i != (*RETVAL).size(); i++) {
-        ClipperLib::Polygon* mypoly = &(*RETVAL)[i];
-        for (Polygon::size_type j = 0; j != (*mypoly).size(); j++) {
-            (*mypoly)[j].X /= scale;
-            (*mypoly)[j].Y /= scale;
-        }
-    }
+    ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
   OUTPUT:
     RETVAL
 

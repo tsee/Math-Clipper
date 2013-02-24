@@ -1,8 +1,5 @@
 Revision history for Perl extension Math::Clipper.
 
-  - Move coordinate scaling for offset from Perl to XS for better
-    performance.
-
 1.17  Tue Jan 15 14:07:00 2013
 
   - Expose PFT_POSITIVE and PFT_NEGATIVE constants.
