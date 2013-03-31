@@ -1,5 +1,5 @@
 use Math::Clipper ':all';
-use Test::More tests => 10;
+use Test::More tests => 12;
 
 my $ccw = [
 [0,0],
@@ -47,6 +47,12 @@ is($asum,((16 + 20) - 16),'area check for negative cw off');
     my $offpolys2 = Math::Clipper::int_offset([$ccw], 1.0, 1, JT_MITER, 2);
     ok @$offpolys2 == 1, 'positive int_offset, on ccw';
     is Math::Clipper::area($offpolys2->[0]), (16 + 20), 'area check for positive ccw int_offset';
+}
+
+{
+    my $res = Math::Clipper::ex_int_offset([$ccw, $cw], 1.0, 1, JT_MITER, 2);
+    ok @$res == 1, 'ex_int_offset returned one item';
+    isa_ok $res->[0], 'HASH', 'ex_int_offset returned one ExPolygon';
 }
 
 __END__

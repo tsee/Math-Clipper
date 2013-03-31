@@ -139,27 +139,24 @@ int_offset(polygons, delta, scale, jointype, MiterLimit)
     JoinType jointype
     const double MiterLimit
   CODE:
-    // scale
-    for (Polygons::size_type i = 0; i != (*polygons).size(); i++) {
-        ClipperLib::Polygon* mypoly = &(*polygons)[i];
-        for (Polygon::size_type j = 0; j != (*mypoly).size(); j++) {
-            (*mypoly)[j].X *= scale;
-            (*mypoly)[j].Y *= scale;
-        }
-    }
-    
-    // perform offset
-    RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*polygons, *RETVAL, (delta*scale), jointype, MiterLimit);
-    
-    // unscale
-    for (Polygons::size_type i = 0; i != (*RETVAL).size(); i++) {
-        ClipperLib::Polygon* mypoly = &(*RETVAL)[i];
-        for (Polygon::size_type j = 0; j != (*mypoly).size(); j++) {
-            (*mypoly)[j].X /= scale;
-            (*mypoly)[j].Y /= scale;
-        }
-    }
+    RETVAL = _int_offset(polygons, delta, scale, jointype, MiterLimit);
+  OUTPUT:
+    RETVAL
+
+ClipperLib::ExPolygons*
+ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
+    ClipperLib::Polygons* polygons
+    const float delta
+    const double scale
+    JoinType jointype
+    const double MiterLimit
+  CODE:
+    Clipper clpr;
+    clpr.Clear();
+    ClipperLib::Polygons* offset = _int_offset(polygons, delta, scale, jointype, MiterLimit);
+    clpr.AddPolygons(*offset, ptSubject);
+    RETVAL = new ClipperLib::ExPolygons();
+    clpr.Execute(ctUnion, *RETVAL, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
   OUTPUT:
     RETVAL
 

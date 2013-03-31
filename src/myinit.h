@@ -4,6 +4,7 @@
 #include "clipper.hpp"
 
 #include "poly2av.h"
+#include "offset.h"
 
 using namespace ClipperLib;
 

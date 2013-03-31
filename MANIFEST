@@ -7,6 +7,7 @@ META.yml
 src/clipper.cpp
 src/clipper.hpp
 src/myinit.h
+src/offset.h
 src/poly2av.h
 src/ppport.h
 t/001compile.t
