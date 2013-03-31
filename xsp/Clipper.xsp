@@ -160,6 +160,38 @@ ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
   OUTPUT:
     RETVAL
 
+ClipperLib::ExPolygons*
+ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
+    ClipperLib::Polygons* polygons
+    const float delta1
+    const float delta2
+    const double scale
+    JoinType jointype
+    const double MiterLimit
+  CODE:
+    // scale
+    _scale_polygons(polygons, scale);
+    
+    // perform first offset
+    ClipperLib::Polygons* offset1 = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    
+    // perform second offset
+    ClipperLib::Polygons* offset2 = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolygons(*offset1, *offset2, (delta2*scale), jointype, MiterLimit);
+    
+    // unscale
+    _scale_polygons(offset2, 1/scale);
+    
+    // perform UNION
+    Clipper clpr;
+    clpr.Clear();
+    clpr.AddPolygons(*offset2, ptSubject);
+    RETVAL = new ClipperLib::ExPolygons();
+    clpr.Execute(ctUnion, *RETVAL, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
+  OUTPUT:
+    RETVAL
+
 ClipperLib::Polygons*
 simplify_polygon(polygon, fillType)
     ClipperLib::Polygon* polygon

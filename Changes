@@ -2,6 +2,7 @@ Revision history for Perl extension Math::Clipper.
 
   - new int_offset()
   - new ex_int_offset()
+  - new ex_int_offset2()
 
 1.17  Tue Jan 15 14:07:00 2013
 

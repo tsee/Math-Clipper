@@ -24,7 +24,7 @@ our %EXPORT_TAGS = (
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO PFT_POSITIVE PFT_NEGATIVE/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
-                    simplify_polygon simplify_polygons int_offset ex_int_offset/],
+                    simplify_polygon simplify_polygons int_offset ex_int_offset ex_int_offset2/],
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
@@ -464,10 +464,17 @@ only use this one if your input polygons only have integer coordinates.
 
 =head2 ex_int_offset
 
-    my $offset_polygons = ex_int_offset($polygons, $distance, $scale, $jointype, $miterlimit);
+    my $offset_expolygons = ex_int_offset($polygons, $distance, $scale, $jointype, $miterlimit);
 
 This function works like int_offset() but it does a UNION operation on the resulting polygons
 and returns an arrayref of ExPolygons.
+
+=head2 ex_int_offset2
+
+    my $offset_expolygons = ex_int_offset2($polygons, $distance1, $distance2, $scale, $jointype, $miterlimit);
+
+This function works like ex_int_offset() but it does two consecutive offsets with the given 
+distances before performing the UNION operation.
 
 =head2 area
 
