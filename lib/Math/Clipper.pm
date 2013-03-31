@@ -24,7 +24,7 @@ our %EXPORT_TAGS = (
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO PFT_POSITIVE PFT_NEGATIVE/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
-                    simplify_polygon simplify_polygons/],
+                    simplify_polygon simplify_polygons int_offset/],
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
@@ -452,6 +452,15 @@ of what you expect, although this seems to be fixed in recent Clipper versions. 
 it if it is important in your application.
 
 Join type can be one of C<JT_MITER>, C<JT_ROUND> or C<JT_SQUARE>.
+
+=head2 int_offset
+
+    my $offset_polygons = int_offset($polygons, $distance, $scale, $jointype, $miterlimit);
+
+This function is a faster replacement for offset() when input coordinates are integers. 
+If floats are supplied to it, their decimal digits will be truncated so the offset might 
+work on invalid geometry (truncation can lead to self-intersecting polygons). Be sure to
+only use this one if your input polygons only have integer coordinates.
 
 =head2 area
 
