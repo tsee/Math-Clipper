@@ -9,10 +9,10 @@ ClipperLib::Polygon			T_VECTOR_POINT
 ClipperLib::Polygon*		T_VECTOR_POINT_PTR
 ClipperLib::Polygons		T_VECTOR_VECTOR_POINT
 ClipperLib::Polygons*		T_VECTOR_VECTOR_POINT_PTR
-ClipperLib::ExPolygon		T_EXPOLY
-ClipperLib::ExPolygon*		T_EXPOLY_PTR
-ClipperLib::ExPolygons		T_VECTOR_EXPOLY
-ClipperLib::ExPolygons*		T_VECTOR_EXPOLY_PTR
+ExPolygon		T_EXPOLY
+ExPolygon*		T_EXPOLY_PTR
+ExPolygons		T_VECTOR_EXPOLY
+ExPolygons*		T_VECTOR_EXPOLY_PTR
 
 INPUT
 T_VECTOR_POINT

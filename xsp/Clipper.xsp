@@ -48,15 +48,17 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
   OUTPUT:
     RETVAL
 
-ClipperLib::ExPolygons*
+ExPolygons*
 ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
   CODE:
-    RETVAL = new ClipperLib::ExPolygons();
-    THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+    PolyTree* polytree = new ClipperLib::PolyTree();
+    THIS->Execute(clipType, *polytree, subjFillType, clipFillType);
+    RETVAL = new ExPolygons();
+    PolyTreeToExPolygons(*polytree, *RETVAL);
   OUTPUT:
     RETVAL
 %}
@@ -143,7 +145,7 @@ int_offset(polygons, delta, scale, jointype, MiterLimit)
   OUTPUT:
     RETVAL
 
-ClipperLib::ExPolygons*
+ExPolygons*
 ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     ClipperLib::Polygons* polygons
     const float delta
@@ -155,12 +157,15 @@ ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     clpr.Clear();
     ClipperLib::Polygons* offset = _int_offset(polygons, delta, scale, jointype, MiterLimit);
     clpr.AddPolygons(*offset, ptSubject);
-    RETVAL = new ClipperLib::ExPolygons();
-    clpr.Execute(ctUnion, *RETVAL, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
+    PolyTree* polytree = new ClipperLib::PolyTree();
+    clpr.Execute(ctUnion, *polytree, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
+    
+    RETVAL = new ExPolygons();
+    PolyTreeToExPolygons(*polytree, *RETVAL);
   OUTPUT:
     RETVAL
 
-ClipperLib::ExPolygons*
+ExPolygons*
 ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     ClipperLib::Polygons* polygons
     const float delta1
@@ -187,8 +192,12 @@ ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     Clipper clpr;
     clpr.Clear();
     clpr.AddPolygons(*offset2, ptSubject);
-    RETVAL = new ClipperLib::ExPolygons();
-    clpr.Execute(ctUnion, *RETVAL, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
+    PolyTree* polytree = new ClipperLib::PolyTree();
+    clpr.Execute(ctUnion, *polytree, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
+    
+    // convert result to ExPolygons
+    RETVAL = new ExPolygons();
+    PolyTreeToExPolygons(*polytree, *RETVAL);
   OUTPUT:
     RETVAL
 

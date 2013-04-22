@@ -48,7 +48,7 @@ polygons2perl(pTHX_ const ClipperLib::Polygons& poly)
 
 
 SV*
-expolygon2perl(pTHX_ const ClipperLib::ExPolygon& poly)
+expolygon2perl(pTHX_ const ExPolygon& poly)
 {
   HV* hv = newHV();
   hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ poly.outer) );
@@ -58,7 +58,7 @@ expolygon2perl(pTHX_ const ClipperLib::ExPolygon& poly)
 
 
 SV*
-expolygons2perl(pTHX_ const ClipperLib::ExPolygons& polys)
+expolygons2perl(pTHX_ const ExPolygons& polys)
 {
   AV* av = newAV();
   SV* innerav;
@@ -153,7 +153,7 @@ perl2polygons(pTHX_ AV* theAv)
       }                                                                                \
     } STMT_END
 
-ClipperLib::ExPolygon*
+ExPolygon*
 perl2expolygon(pTHX_ HV* theHv)
 {
   AV* outerav;
@@ -161,7 +161,7 @@ perl2expolygon(pTHX_ HV* theHv)
   AV_CHECK(outerav, theHv, "outer");
   AV_CHECK(holesav, theHv, "holes");
 
-  ClipperLib::ExPolygon* retval = new ClipperLib::ExPolygon();
+  ExPolygon* retval = new ExPolygon();
   ClipperLib::Polygon* tmp = perl2polygon(aTHX_ outerav);
   if (!tmp) {
     delete retval;
@@ -181,11 +181,11 @@ perl2expolygon(pTHX_ HV* theHv)
 #undef AV_CHECK
 
 
-ClipperLib::ExPolygons*
+ExPolygons*
 perl2expolygons(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  std::vector<ClipperLib::ExPolygon> tmpEx; // Done because of croak
+  std::vector<ExPolygon> tmpEx; // Done because of croak
 
   SV** elem;
   HV* innerhv;
@@ -195,14 +195,14 @@ perl2expolygons(pTHX_ AV* theAv)
         || SvTYPE(SvRV(*elem)) != SVt_PVHV)
       return NULL;
     innerhv = (HV*)SvRV(*elem);
-    ClipperLib::ExPolygon* tmp = perl2expolygon(aTHX_ innerhv);
+    ExPolygon* tmp = perl2expolygon(aTHX_ innerhv);
     if (tmp == NULL)
       return NULL;
     tmpEx[i] = *tmp;
     delete tmp;
   }
 
-  ClipperLib::ExPolygons* retval = new ClipperLib::ExPolygons(tmpEx);
+  ExPolygons* retval = new ExPolygons(tmpEx);
   return retval;
 }
 
