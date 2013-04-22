@@ -1,5 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
+1.19  Mon Apr 22 13:54:00 2013
+
   - Upgraded the Clipper library to the newest available version 5.1.4.
 
 1.18  Sun Mar 31 12:46:00 2013
