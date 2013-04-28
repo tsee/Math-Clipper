@@ -8,8 +8,8 @@ using namespace ClipperLib;
 //-----------------------------------------------------------
 // legacy code from Clipper documentation
 struct ExPolygon {
-  Polygon outer;
-  Polygons holes;
+  ClipperLib::Polygon outer;
+  ClipperLib::Polygons holes;
 };
  
 typedef std::vector< ExPolygon > ExPolygons;
