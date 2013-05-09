@@ -9,6 +9,7 @@ ClipperLib::Polygon			T_VECTOR_POINT
 ClipperLib::Polygon*		T_VECTOR_POINT_PTR
 ClipperLib::Polygons		T_VECTOR_VECTOR_POINT
 ClipperLib::Polygons*		T_VECTOR_VECTOR_POINT_PTR
+ClipperLib::PolyTree*		T_POLYTREE_PTR
 ExPolygon		T_EXPOLY
 ExPolygon*		T_EXPOLY_PTR
 ExPolygons		T_VECTOR_EXPOLY
@@ -143,6 +144,7 @@ T_VECTOR_EXPOLY_PTR
 	             ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
 	             \"$var\");
 
+
 OUTPUT
 
 T_VECTOR_POINT
@@ -171,5 +173,9 @@ T_VECTOR_EXPOLY
 
 T_VECTOR_EXPOLY_PTR
 	$arg = expolygons2perl(aTHX_ *$var);
+	delete $var;
+
+T_POLYTREE_PTR
+	$arg = polytree2perl(aTHX_ *$var);
 	delete $var;
 

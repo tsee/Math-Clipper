@@ -51,8 +51,8 @@ SV*
 expolygon2perl(pTHX_ const ExPolygon& poly)
 {
   HV* hv = newHV();
-  hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ poly.outer) );
-  hv_stores( hv, "holes", (SV*)polygons2perl(aTHX_ poly.holes) );
+  (void)hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ poly.outer) );
+  (void)hv_stores( hv, "holes", (SV*)polygons2perl(aTHX_ poly.holes) );
   return (SV*)newRV_noinc((SV*)hv);
 }
 
@@ -69,6 +69,39 @@ expolygons2perl(pTHX_ const ExPolygons& polys)
     av_store(av, i, innerav);
   }
   return (SV*)newRV_noinc((SV*)av);
+}
+
+SV* polynode2perl(const PolyNode& node);
+
+SV*
+polynode_children_2_perl(const PolyNode& node)
+{
+    AV* av = newAV();
+    const unsigned int len = node.ChildCount();
+    av_extend(av, len-1);
+    for (int i = 0; i < len; ++i) {
+        av_store(av, i, polynode2perl(*node.Childs[i]));
+    }
+    return (SV*)newRV_noinc((SV*)av);
+}
+
+SV*
+polynode2perl(const PolyNode& node)
+{
+    HV* hv = newHV();
+    if (node.IsHole()) {
+        (void)hv_stores( hv, "hole", (SV*)polygon2perl(aTHX_ node.Contour) );
+    } else {
+        (void)hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ node.Contour) );
+    }
+    (void)hv_stores( hv, "children", (SV*)polynode_children_2_perl(node) );
+    return (SV*)newRV_noinc((SV*)hv);
+}
+
+SV*
+polytree2perl(pTHX_ const PolyTree& polytree)
+{
+    return polynode_children_2_perl(polytree);
 }
 
 

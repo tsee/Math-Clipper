@@ -281,6 +281,28 @@ an I<ExPolygon> is as follows,:
   
   }
 
+Clipper additionally offers an export type named I<PolyTree> which represents several
+nested polygons by assigning each one to its parent. The I<PolyTree> structure is an
+arrayref looking like this one:
+
+  [
+      { outer => [ ..points.. ], children => [] },
+      {
+         outer => [ ..points.. ],
+         children => [
+            { hole => [ ..points.. ], children => [] },
+            { hole => [ ..points.. ], children => [] },
+         ],
+      }
+  ]
+
+Each item is a hashref which may contain either the I<contour> or the I<hole>
+key, containing the polygon points. It also contains a I<children> key containing
+an arrayref of hashrefs itself, and so on.
+The Clipper documentation reports that it's more computationally expensive to process 
+(roughly 5-10% slower), it should only be used when parent-child polygon relationships 
+are needed and not just polygon coordinates.
+
 The "fill type" of a polygon refers to the strategy used to determine
 which side of a polygon is the inside, and whether a polygon represents
 a filled region, or a hole. You may optionally specify the fill type of
@@ -349,6 +371,11 @@ used.
 
 Like C<execute>, performs the actual clipping operation, but
 returns a reference to an array of ExPolygons. (see L</CONVENTIONS>)
+
+=head2 pt_execute
+
+Like C<execute>, performs the actual clipping operation, but
+returns a PolyTree structure. (see L</CONVENTIONS>)
 
 =head2 clear
 

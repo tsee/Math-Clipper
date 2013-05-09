@@ -61,6 +61,18 @@ ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     PolyTreeToExPolygons(*polytree, *RETVAL);
   OUTPUT:
     RETVAL
+
+ClipperLib::PolyTree*
+pt_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
+    Clipper* THIS
+    ClipType clipType
+    PolyFillType subjFillType
+    PolyFillType clipFillType
+  CODE:
+    RETVAL = new ClipperLib::PolyTree();
+    THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+  OUTPUT:
+    RETVAL
 %}
 
 // No longer in v4.X
