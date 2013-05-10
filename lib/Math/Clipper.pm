@@ -603,7 +603,7 @@ L<http://sourceforge.net/projects/polyclipping/>
 
 =head1 VERSION
 
-This module was built around, and includes, Clipper version 5.1.4.
+This module was built around, and includes, Clipper version 5.1.5.
 
 =head1 AUTHOR
 

@@ -32,9 +32,9 @@ SCOPE: {
       [0, 10],
     ],
   );
-
+  
   $c->add_clip_polygon(
-    [
+    my $clip = [
       [0, 0],
       [5, 0],
       [5, 10],
@@ -44,14 +44,7 @@ SCOPE: {
 
   my $ppoly = $c->execute(CT_INTERSECTION);
   ok(ref($ppoly) eq 'ARRAY');
-  is_deeply($ppoly,
-    [[
-      [ '0', '10' ],
-      [ '0', '0' ],
-      [ '5', '0' ],
-      [ '5', '10' ],
-    ]]
-  );
+  is area($ppoly->[0]), area($clip);
 }
 
 SCOPE: {
