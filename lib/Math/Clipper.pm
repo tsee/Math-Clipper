@@ -489,6 +489,15 @@ If floats are supplied to it, their decimal digits will be truncated so the offs
 work on invalid geometry (truncation can lead to self-intersecting polygons). Be sure to
 only use this one if your input polygons only have integer coordinates.
 
+=head2 int_offset2
+
+    my $offset_polygons = int_offset($polygons, $distance1, $distance2, $scale, $jointype, $miterlimit);
+
+This function works like int_offset() but it does two consecutive offsets with the given 
+distances. The purpose of the I<*offset2> functions is to avoid overhead when two consecutive
+offsets are needed (scaling/unscaling only happens once, and no conversion to Perl variables
+happens in between).
+
 =head2 ex_int_offset
 
     my $offset_expolygons = ex_int_offset($polygons, $distance, $scale, $jointype, $miterlimit);

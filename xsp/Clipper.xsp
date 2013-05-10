@@ -157,6 +157,31 @@ int_offset(polygons, delta, scale, jointype, MiterLimit)
   OUTPUT:
     RETVAL
 
+ClipperLib::Polygons*
+int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
+    ClipperLib::Polygons* polygons
+    const float delta1
+    const float delta2
+    const double scale
+    JoinType jointype
+    const double MiterLimit
+  CODE:
+    // scale
+    _scale_polygons(polygons, scale);
+    
+    // perform first offset
+    ClipperLib::Polygons* offset1 = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    
+    // perform second offset
+    RETVAL = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolygons(*offset1, *RETVAL, (delta2*scale), jointype, MiterLimit);
+    
+    // unscale
+    _scale_polygons(RETVAL, 1/scale);
+  OUTPUT:
+    RETVAL
+
 ExPolygons*
 ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     ClipperLib::Polygons* polygons

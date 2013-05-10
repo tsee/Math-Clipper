@@ -1,5 +1,5 @@
 use Math::Clipper ':all';
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 my $ccw = [
 [0,0],
@@ -53,6 +53,12 @@ is($asum,((16 + 20) - 16),'area check for negative cw off');
     my $res = Math::Clipper::int_offset([$ccw], -1.0, 1, JT_MITER, 2);
     ok @$res == 1, 'negative int_offset, on ccw';
     is Math::Clipper::area($res->[0]), 2*2, 'area check for negative ccw int_offset';
+}
+
+{
+    my $res = Math::Clipper::int_offset2([$ccw], 1.0, -1.0, 1, JT_MITER, 2);
+    ok @$res == 1, 'int_offset2 returned one item';
+    is Math::Clipper::area($ccw), Math::Clipper::area($res->[0]), 'int_offset2 performed double offset';
 }
 
 {
