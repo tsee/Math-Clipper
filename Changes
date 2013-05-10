@@ -1,5 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
+1.21  Fri May 10 14:43:00 2013
+
   - New pt_execute() method exposing PolyTree.
   - New int_offset2()
   - Upgraded the Clipper library to the newest available version 5.1.5.
