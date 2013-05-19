@@ -1,5 +1,7 @@
 Revision history for Perl extension Math::Clipper.
 
+1.22  Sun May 19 17:14:00 2013
+
   - Fixed some memory leaks.
 
 1.21  Fri May 10 14:43:00 2013
