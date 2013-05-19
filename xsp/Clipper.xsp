@@ -59,6 +59,7 @@ ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     THIS->Execute(clipType, *polytree, subjFillType, clipFillType);
     RETVAL = new ExPolygons();
     PolyTreeToExPolygons(*polytree, *RETVAL);
+    delete polytree;
   OUTPUT:
     RETVAL
 
@@ -124,6 +125,7 @@ orientation(polygon)
     ClipperLib::Polygon* polygon
   CODE:
     RETVAL = ClipperLib::Orientation(*polygon);
+    delete polygon;
   OUTPUT: RETVAL
 
 double
@@ -131,6 +133,7 @@ area(polygon)
     ClipperLib::Polygon* polygon
   CODE:
     RETVAL = ClipperLib::Area(*polygon);
+    delete polygon;
   OUTPUT: RETVAL
 
 ClipperLib::Polygons*
@@ -142,6 +145,7 @@ _offset(polygons, delta, jointype, MiterLimit)
   CODE:
     RETVAL = new ClipperLib::Polygons();
     ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
+    delete polygons;
   OUTPUT:
     RETVAL
 
@@ -154,6 +158,7 @@ int_offset(polygons, delta, scale, jointype, MiterLimit)
     const double MiterLimit
   CODE:
     RETVAL = _int_offset(polygons, delta, scale, jointype, MiterLimit);
+    delete polygons;
   OUTPUT:
     RETVAL
 
@@ -179,6 +184,10 @@ int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     
     // unscale
     _scale_polygons(RETVAL, 1/scale);
+    
+    // cleanup
+    delete offset1;
+    delete polygons;
   OUTPUT:
     RETVAL
 
@@ -199,6 +208,10 @@ ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     
     RETVAL = new ExPolygons();
     PolyTreeToExPolygons(*polytree, *RETVAL);
+    
+    // cleanup
+    delete polygons;
+    delete polytree;
   OUTPUT:
     RETVAL
 
@@ -235,6 +248,12 @@ ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     // convert result to ExPolygons
     RETVAL = new ExPolygons();
     PolyTreeToExPolygons(*polytree, *RETVAL);
+    
+    // cleanup
+    delete polygons;
+    delete offset1;
+    delete offset2;
+    delete polytree;
   OUTPUT:
     RETVAL
 
@@ -245,6 +264,7 @@ simplify_polygon(polygon, fillType)
   CODE:
     RETVAL = new ClipperLib::Polygons();
     ClipperLib::SimplifyPolygon(*polygon, *RETVAL, fillType);
+    delete polygon;
   OUTPUT:
     RETVAL
 
@@ -255,6 +275,7 @@ simplify_polygons(polygons, fillType)
   CODE:
     RETVAL = new ClipperLib::Polygons();
     ClipperLib::SimplifyPolygons(*polygons, *RETVAL, fillType);
+    delete polygons;
   OUTPUT:
     RETVAL
 %}
