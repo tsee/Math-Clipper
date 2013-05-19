@@ -211,6 +211,7 @@ ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     
     // cleanup
     delete polygons;
+    delete offset;
     delete polytree;
   OUTPUT:
     RETVAL
