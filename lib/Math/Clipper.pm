@@ -23,6 +23,8 @@ our %EXPORT_TAGS = (
     #polytypes     => [qw/PT_SUBJECT PT_CLIP/],
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO PFT_POSITIVE PFT_NEGATIVE/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
+    endtypes     => [qw/ET_SQUARE ET_ROUND ET_BUTT ET_CLOSED/],
+    zfilltypes     => [qw/ZFT_NONE ZFT_MAX ZFT_MIN ZFT_MEAN ZFT_BOTH_UINT32/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
                     simplify_polygon simplify_polygons int_offset ex_int_offset ex_int_offset2/],
 );
@@ -248,6 +250,16 @@ during the clipping operation:
     PFT_POSITIVE
     PFT_NEGATIVE
 
+The following constants may be used to specify which predetermined
+zFill callback to use, when using point coordinates with and extra
+Z value.
+
+    ZFT_NONE
+    ZFT_MAX
+    ZFT_MIN
+    ZFT_MEAN
+    ZFT_BOTH_UINT32
+
 =head1 CONVENTIONS
 
 I<INTEGERS>: Clipper 4.x works with polygons with integer coordinates.
@@ -367,6 +379,12 @@ used.
 
     my $result = $clipper->execute( CT_UNION, PFT_EVENODD, PFT_EVENODD );
 
+A fourth parameter may be passed to specify which of the predermined
+zfill callback functions to use. The default is ZFT_NONE.
+
+    my $result = $clipper->execute( CT_UNION, PFT_EVENODD, PFT_EVENODD, ZFT_MAX);
+
+
 =head2 ex_execute
 
 Like C<execute>, performs the actual clipping operation, but
@@ -381,6 +399,63 @@ returns a PolyTree structure. (see L</CONVENTIONS>)
 
 For reuse of a C<Math::Clipper> object, you can call the
 C<clear> method to remove all polygons and internal data from previous clipping operations.
+
+=head1 Z VALUES AND Z FILL OPTIONS
+
+Point data may include a third value, after the X and Y coordinates. It is an aribitrary
+data field refered to as Z. Clipper passes this data through to the result untouched for original
+points that survive the clipping operation.
+
+When Clipper generates intersection points between input edges, an optional callback function
+may set the Z value for each the new point, given the Z value for the two crossing edges. (An
+edge's Z value is the Z value of the point at the start of the edge.) The following pre-determined
+Z fill functions may be used.
+
+=head2 ZFT_BOTH_UINT32
+
+The Z values of the two edges that intersect will be interpreted as
+32 bit unsigned integers, and both will be returned.
+
+This could typically be used to identify the input edges that contribute 
+to the output intersection point, if the integers are indices into the 
+input edge/point list.
+
+Or it could be used to identify which input polygons contribute to an output
+polygon, and what subsequences of output polygon points come from which
+input polygons. In this case, Z values for all points in each polygon would 
+bear the same integer identifying the polygon.
+
+=head2 ZFT_MAX
+
+The intersection point will inherit the maximum Z value of the two 
+intersecting edges.
+
+=head2 ZFT_MIN
+
+The intersection point will inherit the minimum Z value of the two 
+intersecting edges.
+
+=head2 ZFT_MEAN
+
+The intersection point will inherit the arithmetic mean ((Z1+Z2)/2) of the 
+Z values of the two intersecting edges. 
+
+=head2 ZFT_NONE
+
+No callback function will be defined. Clipper will simply set Z to zero for
+all intersection points (while still passing through any Z values present in
+other points).
+
+=head2 NO Z FILL FOR OFFSETS
+
+Clipper does not attempt to pass Z values through for offset operations.
+The way offset points are generated, the result would often be quite scrambled
+and meaningless.
+
+However, sometimes it wouldn't. You might consider calculating your own offset points
+with Z values in a manner similar to Clipper, and then using a Z-preserving union to
+clean up the results, just as Clipper does. It should be fairly simple to glean the 
+initial offset point calculation from the Clipper source.
 
 =head1 UTILITY FUNCTIONS
 

@@ -24,6 +24,15 @@ _constant()
     JT_MITER = jtMiter
     JT_ROUND = jtRound
     JT_SQUARE = jtSquare
+    ET_CLOSED = etClosed
+    ET_BUTT = etButt
+    ET_SQUARE = etSquare
+    ET_ROUND = etRound
+    ZFT_NONE = zftNone
+    ZFT_MAX = zftMax
+    ZFT_MIN = zftMin
+    ZFT_MEAN = zftMean
+    ZFT_BOTH_UINT32 = zftBothUInt32
   CODE:
     RETVAL = ix;
   OUTPUT: RETVAL
@@ -37,26 +46,32 @@ class Clipper {
 
 %{
 ClipperLib::Polygons*
-execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
+execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zfill = zftNone)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
+    ZFillType zfill
   CODE:
     RETVAL = new ClipperLib::Polygons();
+    set_zfill_callback(*THIS, zfill);
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+    zfill_postprocess(*RETVAL, clipType, zfill);
   OUTPUT:
     RETVAL
 
 ExPolygons*
-ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
+ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zfill = zftNone)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
+    ZFillType zfill
   CODE:
     PolyTree* polytree = new ClipperLib::PolyTree();
+    set_zfill_callback(*THIS, zfill);
     THIS->Execute(clipType, *polytree, subjFillType, clipFillType);
+    zfill_postprocess_pt(*polytree, clipType, zfill);
     RETVAL = new ExPolygons();
     PolyTreeToExPolygons(*polytree, *RETVAL);
     delete polytree;
@@ -64,14 +79,17 @@ ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
     RETVAL
 
 ClipperLib::PolyTree*
-pt_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd)
+pt_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zfill = zftNone)
     Clipper* THIS
     ClipType clipType
     PolyFillType subjFillType
     PolyFillType clipFillType
+    ZFillType zfill
   CODE:
     RETVAL = new ClipperLib::PolyTree();
+    set_zfill_callback(*THIS, zfill);
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+    zfill_postprocess_pt(*RETVAL, clipType, zfill);
   OUTPUT:
     RETVAL
 %}
@@ -255,6 +273,20 @@ ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     delete offset1;
     delete offset2;
     delete polytree;
+  OUTPUT:
+    RETVAL
+
+ClipperLib::Polygons*
+polylines_offset(polylines, delta, jointype, endtype, limit)
+    ClipperLib::Polygons* polylines
+    const float delta
+    JoinType jointype
+    EndType endtype
+    const double limit
+  CODE:
+    RETVAL = new ClipperLib::Polygons();
+    ClipperLib::OffsetPolyLines(*polylines, *RETVAL, delta, jointype, endtype, limit);
+    delete polylines;
   OUTPUT:
     RETVAL
 

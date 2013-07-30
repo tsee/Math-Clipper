@@ -2,8 +2,10 @@ Clipper*		O_OBJECT
 
 PolyType		T_UV
 ClipType		T_UV
+EndType		T_UV
 PolyFillType		T_UV
 JoinType		T_UV
+ZFillType		T_UV
 
 ClipperLib::Polygon			T_VECTOR_POINT
 ClipperLib::Polygon*		T_VECTOR_POINT_PTR

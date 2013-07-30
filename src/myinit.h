@@ -39,5 +39,6 @@ void PolyTreeToExPolygons(ClipperLib::PolyTree& polytree, ExPolygons& expolygons
 
 #include "poly2av.h"
 #include "offset.h"
+#include "zfill.h"
 
 #endif
