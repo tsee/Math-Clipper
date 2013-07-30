@@ -13,17 +13,27 @@ polygon2perl(pTHX_ const ClipperLib::Polygon& poly)
   for (unsigned int i = 0; i < len; i++) {
     innerav = newAV();
     av_store(av, i, newRV_noinc((SV*)innerav));
+#ifdef use_xyz
+    av_fill(innerav, 2);
+#else
     av_fill(innerav, 1);
+#endif
     // IVSIZE is from perl/lib/CORE/config.h, defined as sizeof(IV)
 #if IVSIZE >= 8
     // if Perl integers are 64 bit, use newSViv()
     av_store(innerav, 0, newSViv(poly[i].X));
     av_store(innerav, 1, newSViv(poly[i].Y));
+#ifdef use_xyz
+    av_store(innerav, 2, newSViv(poly[i].Z));
+#endif
 #else
     // otherwise we expect Clipper integers to fit in the
 	// 53 bit mantissa of a Perl double
     av_store(innerav, 0, newSVnv(poly[i].X));
     av_store(innerav, 1, newSVnv(poly[i].Y));
+#ifdef use_xyz
+    av_store(innerav, 2, newSVnv(poly[i].Z));
+#endif
 #endif
 
 
@@ -130,12 +140,22 @@ perl2polygon(pTHX_ AV* theAv)
     // Clipper.pm then supports 64 bit ints.
     p.X = (ClipperLib::long64)SvIV(*av_fetch(innerav, 0, 0));
     p.Y = (ClipperLib::long64)SvIV(*av_fetch(innerav, 1, 0));
+#ifdef use_xyz
+    if (av_len(innerav) > 1) {
+       p.Z = (ClipperLib::cInt) SvIV(*av_fetch(innerav, 2, 0));
+    } // else p.Z defaults to zero
+#endif
 #else
     // otherwise coerce the Perl scalar to a double, with SvNV()
     // Perl doubles commonly allow 53 bits for the mantissa.
     // So in the common case, Clipper.pm supports 53 bit integers, stored in doubles on the Perl side.
     p.X = (ClipperLib::long64)SvNV(*av_fetch(innerav, 0, 0));
     p.Y = (ClipperLib::long64)SvNV(*av_fetch(innerav, 1, 0));
+#ifdef use_xyz
+    if (av_len(innerav) > 1) {
+       p.Z = (ClipperLib::cInt)SvNV(*av_fetch(innerav, 2, 0));
+    } // else p.Z defaults to zero
+#endif
 #endif
   }
   return retval;
