@@ -53,7 +53,7 @@ is(scalar(@{$result}),1,'round-tripped polygon preserved. a');
 
 if ($diagnostics) {diag("\n\npoints at limits:\ngot\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nexpected\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$big_diamond})."\n\n");}
 cmp_deeply(
-    $result->[0],
+    [map [@{$_}[0,1]], @{$result->[0]}],
     bag(@{$big_diamond}),
     'round-tripped coords at integer limits preserved'
 );
@@ -140,7 +140,7 @@ unscale_coordinate_sets($scalevec, $result);
 if ($diagnostics) {diag("\n\nintegerized constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$AexpectUnscaled})."\n\n");}
 
 cmp_deeply(
-    $result->[0],
+    [map [@{$_}[0,1]], @{$result->[0]}],
     bag( @{$AexpectUnscaled} ),
     'lose smallest digits when integerized constrained - unscaled'
 );
@@ -178,7 +178,7 @@ unscale_coordinate_sets($scalevec,$result);
 
 if ($diagnostics) {diag("\n\nintegerized not constrained - unscaled:\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$result->[0]})."\nand\n".join("\n",map {"[$_->[0],$_->[1]]"} @{$A})."\n\n");}
 cmp_deeply(
-    $result->[0],
+    [map [@{$_}[0,1]], @{$result->[0]}],
     bag( @{$A} ),
     'keep smallest digits when integerized not constrained - unscaled'
 );
