@@ -250,15 +250,24 @@ during the clipping operation:
     PFT_POSITIVE
     PFT_NEGATIVE
 
-The following constants may be used to specify which predetermined
-zFill callback to use, when using point coordinates with and extra
-Z value.
+The following constants may be imported and used to specify which 
+predetermined zFill callback to use, when using point coordinates 
+with an extra Z value.
 
     ZFT_NONE
     ZFT_MAX
     ZFT_MIN
     ZFT_MEAN
     ZFT_BOTH_UINT32
+
+The following constants may be imported and used to specify the
+style of offset to use at the end of polylines for the 
+C<polylines_offset()> utility.
+
+    ET_CLOSED
+    ET_BUTT
+    ET_SQUARE
+    ET_ROUND
 
 =head1 CONVENTIONS
 
@@ -586,6 +595,20 @@ and returns an arrayref of ExPolygons.
 
 This function works like ex_int_offset() but it does two consecutive offsets with the given 
 distances before performing the UNION operation.
+
+=head2 polylines_offset
+
+    my $offset_polygons = polylines_offset($polyline, $distance, $jointype, $endtype, $limit);
+
+Takes a polyline (list of points just like a polygon, but with ends not considered closed) and returns
+the polygons that result from creating offsets on both sides of the line. If the polyline is like the line in
+the middle of a road, the offset would be the sides of the road, with lines across the road to close the
+polygon at the ends.
+
+The offset around the ends of the polyline can be specified with the fourth parameter, using
+the ET_* end type constants mentioned above under EXPORTS. For an illustration of the
+C<polyline_offset()> end types, see the Clipper documentation:
+ L<http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Routines/OffsetPolyLines.htm>.
 
 =head2 area
 
