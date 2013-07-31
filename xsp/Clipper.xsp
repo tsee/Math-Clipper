@@ -45,6 +45,7 @@ class Clipper {
   ~Clipper();
 
 %{
+
 ClipperLib::Polygons*
 execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zfill = zftNone)
     Clipper* THIS
@@ -54,9 +55,13 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zf
     ZFillType zfill
   CODE:
     RETVAL = new ClipperLib::Polygons();
+#ifdef use_xyz
     set_zfill_callback(*THIS, zfill);
+#endif
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+#ifdef use_xyz
     zfill_postprocess(*RETVAL, clipType, zfill);
+#endif
   OUTPUT:
     RETVAL
 
@@ -69,9 +74,13 @@ ex_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd,
     ZFillType zfill
   CODE:
     PolyTree* polytree = new ClipperLib::PolyTree();
+#ifdef use_xyz
     set_zfill_callback(*THIS, zfill);
+#endif
     THIS->Execute(clipType, *polytree, subjFillType, clipFillType);
+#ifdef use_xyz
     zfill_postprocess_pt(*polytree, clipType, zfill);
+#endif
     RETVAL = new ExPolygons();
     PolyTreeToExPolygons(*polytree, *RETVAL);
     delete polytree;
@@ -87,9 +96,13 @@ pt_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd,
     ZFillType zfill
   CODE:
     RETVAL = new ClipperLib::PolyTree();
+#ifdef use_xyz
     set_zfill_callback(*THIS, zfill);
+#endif
     THIS->Execute(clipType, *RETVAL, subjFillType, clipFillType);
+#ifdef use_xyz
     zfill_postprocess_pt(*RETVAL, clipType, zfill);
+#endif
   OUTPUT:
     RETVAL
 %}
@@ -111,7 +124,7 @@ add_subject_polygon(self, poly)
     Clipper* self
     ClipperLib::Polygon* poly
   PPCODE:
-    self->AddPolygon(*poly, ptSubject);
+    self->AddPath(*poly, ptSubject, true);
     delete poly;
 
 void
@@ -119,7 +132,7 @@ add_clip_polygon(self, poly)
     Clipper* self
     ClipperLib::Polygon* poly
   PPCODE:
-    self->AddPolygon(*poly, ptClip);
+    self->AddPath(*poly, ptClip, true);
     delete poly;
 
 void
@@ -127,7 +140,7 @@ add_subject_polygons(self, polys)
     Clipper* self
     ClipperLib::Polygons* polys
   PPCODE:
-    self->AddPolygons(*polys, ptSubject);
+    self->AddPaths(*polys, ptSubject, true);
     delete polys;
 
 void
@@ -135,7 +148,39 @@ add_clip_polygons(self, polys)
     Clipper* self
     ClipperLib::Polygons* polys
   PPCODE:
-    self->AddPolygons(*polys, ptClip);
+    self->AddPaths(*polys, ptClip, true);
+    delete polys;
+
+void
+add_subject_polyline(self, poly)
+    Clipper* self
+    ClipperLib::Polygon* poly
+  PPCODE:
+    self->AddPath(*poly, ptSubject, false);
+    delete poly;
+
+void
+add_clip_polyline(self, poly)
+    Clipper* self
+    ClipperLib::Polygon* poly
+  PPCODE:
+    self->AddPath(*poly, ptClip, false);
+    delete poly;
+
+void
+add_subject_polylines(self, polys)
+    Clipper* self
+    ClipperLib::Polygons* polys
+  PPCODE:
+    self->AddPaths(*polys, ptSubject, false);
+    delete polys;
+
+void
+add_clip_polylines(self, polys)
+    Clipper* self
+    ClipperLib::Polygons* polys
+  PPCODE:
+    self->AddPaths(*polys, ptClip, false);
     delete polys;
 
 double
@@ -311,6 +356,14 @@ simplify_polygons(polygons, fillType)
     delete polygons;
   OUTPUT:
     RETVAL
+
+int
+has_z()
+  CODE:
+    RETVAL = CLIPPER_HAS_Z;
+  OUTPUT:
+    RETVAL
+
 %}
 
   %name{clear}

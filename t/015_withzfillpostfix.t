@@ -4,6 +4,9 @@ use warnings;
 use Math::Clipper ':all';
 use Test::More tests => 1;
 
+SKIP: {
+    skip 'not compiled with z support', 1 unless Math::Clipper::has_z;
+
 # This test is specific to the ZFT_BOTH_UINT32 Z setting callback in zfill.h
 # which works well for some simple cases, but needs more development to see
 # if it can be made to work in all cases.
@@ -272,5 +275,7 @@ sub results { return (
 ]
 
 );
+}
+
 }
 __END__

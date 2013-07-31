@@ -4,8 +4,6 @@
 #define ZMARK -1;
 //#include <iostream>
 
-enum ZFillType { zftNone, zftMax, zftMin, zftMean, zftBothUInt32 };
-
 void zfill_mark(long64 z1, long64 z2, IntPoint& pt) {
   pt.Z = ZMARK;
 }

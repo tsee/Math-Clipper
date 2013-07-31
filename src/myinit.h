@@ -39,6 +39,13 @@ void PolyTreeToExPolygons(ClipperLib::PolyTree& polytree, ExPolygons& expolygons
 
 #include "poly2av.h"
 #include "offset.h"
+
+enum ZFillType { zftNone, zftMax, zftMin, zftMean, zftBothUInt32 };
+#ifdef use_xyz
 #include "zfill.h"
+#define CLIPPER_HAS_Z 1
+#else
+#define CLIPPER_HAS_Z 0
+#endif
 
 #endif

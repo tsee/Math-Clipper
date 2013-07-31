@@ -4,6 +4,9 @@ use warnings;
 use Math::Clipper ':all';
 use Test::More tests => 5;
 
+SKIP: {
+    skip 'not compiled with z support', 5 unless Math::Clipper::has_z;
+
 my $p1 = [
     [10,  0, 1],
     [10, 10, 2],
@@ -74,6 +77,8 @@ is_deeply($result->[0], $expect_both_uint32, 'zfill set intersections to mean z'
 sub pfmt {
     my $polygon = shift;
     return join("\n",map {'['.join(', ',@$_).']'} @$polygon);
+}
+
 }
 
 __END__

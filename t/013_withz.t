@@ -4,6 +4,9 @@ use warnings;
 use Math::Clipper ':all';
 use Test::More tests => 1;
 
+SKIP: {
+    skip 'not compiled with z support', 1 unless Math::Clipper::has_z;
+
 my $p1 = [
     [ 50,   0,   -2], # Clipper treats Z as a signed 64 bit int
     [ 20,  10,   0xFFFFFFFF], # max unsigned 32 bit int
@@ -22,4 +25,5 @@ sub pfmt {
     return join("\n",map {'['.join(', ',@$_).']'} @$polygon);
 }
 
+}
 __END__
