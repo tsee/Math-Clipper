@@ -10,6 +10,7 @@ src/myinit.h
 src/offset.h
 src/poly2av.h
 src/ppport.h
+src/zfill.h
 t/001compile.t
 t/002basic.t
 t/003boolops.t
@@ -22,6 +23,9 @@ t/009expolygon.t
 t/010simplify.t
 t/011Int128Comparison.t
 t/012_polytree.t
+t/013_withz.t
+t/014_withzfill.t
+t/015_withzfillpostfix.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
