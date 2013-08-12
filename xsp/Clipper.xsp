@@ -187,8 +187,8 @@ bool
 preserve_collinear(self, ...)
     Clipper* self
   CODE:
-    if (items > 1) { self->PreserveColinear(SvIV(ST(1)) == 0 ? false : true); }
-    RETVAL = self->PreserveColinear();
+    if (items > 1) { self->PreserveCollinear(SvIV(ST(1)) == 0 ? false : true); }
+    RETVAL = self->PreserveCollinear();
   OUTPUT:
     RETVAL
 
@@ -348,19 +348,25 @@ polylines_offset(polylines, delta, jointype, endtype, limit)
     const double limit
   CODE:
     RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolyLines(*polylines, *RETVAL, delta, jointype, endtype, limit);
+    ClipperLib::OffsetPaths(*polylines, *RETVAL, delta, jointype, endtype, limit);
     delete polylines;
   OUTPUT:
     RETVAL
 
+# singular version simplify_polygon() removed in 6.0.0
 ClipperLib::Polygons*
 simplify_polygon(polygon, fillType)
     ClipperLib::Polygon* polygon
     PolyFillType fillType
+  PREINIT:
+    ClipperLib::Polygons* polygons;
   CODE:
     RETVAL = new ClipperLib::Polygons();
-    ClipperLib::SimplifyPolygon(*polygon, *RETVAL, fillType);
+    polygons = new ClipperLib::Polygons();
+    polygons->push_back(*polygon);
+    ClipperLib::SimplifyPolygons(*polygons, *RETVAL, fillType);
     delete polygon;
+    delete polygons;
   OUTPUT:
     RETVAL
 
