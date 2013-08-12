@@ -1,5 +1,15 @@
 Revision history for Perl extension Math::Clipper.
 
+1.23  Monday August 12 12:12:00 2013
+
+  - New polylines_offset()
+  - New strictly_simple()
+  - New preserve_collinear()
+  - Upgraded the Clipper library to the newest available version 6.0.0.
+  - Open paths now supported as clip operation subjects.
+  - Polynodes have "open" key to indicate open path vs. closed polygon.
+  - Allow pass-through Z values for points (arbitrary integer data).
+
 1.22  Sun May 19 17:14:00 2013
 
   - Fixed some memory leaks.
