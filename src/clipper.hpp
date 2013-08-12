@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  6.0.0 (beta2)                                                   *
-* Date      :  30 July 2013                                                    *
+* Version   :  6.0.0                                                           *
+* Date      :  11 August 2013                                                  *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2013                                         *
 *                                                                              *
@@ -34,15 +34,20 @@
 #ifndef clipper_hpp
 #define clipper_hpp
 
-//use_int32: improves performance but limits coordinate values to +/- 46340 range
+//use_int32: When enabled 32bit ints are used instead of 64bit ints. This
+//improve performance but coordinate values are limited to the range +/- 46340
 //#define use_int32
 
-//use_xyz: adds a Z member to IntPoint (with only a minor cost to perfomance)
+//use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
 //#define use_xyz
 
-//use_lines: Enables line clipping. Adds a very minor cost to performance when enabled.
+//use_lines: Enables line clipping. Adds a very minor cost to performance.
 #define use_lines
-                          
+  
+//When enabled, code developed with earlier versions of Clipper 
+//(ie prior to ver 6) should compile without changes. 
+//In a future update, this compatability code will be removed.
+#define use_deprecated  
 
 #include <vector>
 #include <stdexcept>
@@ -64,7 +69,6 @@ enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
 typedef int cInt;
 typedef unsigned int cUInt;
 #else
-typedef signed long long long64; //backward compatibility only
 typedef signed long long cInt;
 typedef unsigned long long cUInt;
 #endif
@@ -79,36 +83,32 @@ struct IntPoint {
   IntPoint(cInt x = 0, cInt y = 0): X(x), Y(y) {};
 #endif
 
-  friend bool operator== (const IntPoint& a, const IntPoint& b);
-  friend bool operator!= (const IntPoint& a, const IntPoint& b);
+  friend inline bool operator== (const IntPoint& a, const IntPoint& b)
+  {
+    return a.X == b.X && a.Y == b.Y;
+  }
+  friend inline bool operator!= (const IntPoint& a, const IntPoint& b)
+  {
+    return a.X != b.X  || a.Y != b.Y; 
+  }
 };
-//------------------------------------------------------------------------------
-
-inline bool operator ==(const IntPoint& a, const IntPoint& b) 
-{
-  return a.X == b.X && a.Y == b.Y; 
-}
-//------------------------------------------------------------------------------
-
-inline bool operator !=(const IntPoint& a, const IntPoint& b) 
-{
-  return a.X != b.X  || a.Y != b.Y; 
-}
 //------------------------------------------------------------------------------
 
 typedef std::vector< IntPoint > Path;
 typedef std::vector< Path > Paths;
 
-// DEPRECATED /////////////////////////////
-typedef Path Polygon;
-typedef Paths Polygons;
-///////////////////////////////////////////
+inline Path& operator <<(Path& poly, const IntPoint& p) {poly.push_back(p); return poly;}
+inline Paths& operator <<(Paths& polys, const Path& p) {polys.push_back(p); return polys;}
 
+std::ostream& operator <<(std::ostream &s, const IntPoint &p);
 std::ostream& operator <<(std::ostream &s, const Path &p);
 std::ostream& operator <<(std::ostream &s, const Paths &p);
 
-inline Path& operator <<(Path& poly, const IntPoint& p) {poly.push_back(p); return poly;}
-inline Paths& operator <<(Paths& polys, const Path& p) {polys.push_back(p); return polys;}
+#ifdef use_deprecated
+typedef signed long long long64; //backward compatibility only
+typedef Path Polygon;
+typedef Paths Polygons;
+#endif
 
 struct DoublePoint
 {
@@ -118,22 +118,22 @@ struct DoublePoint
 };
 //------------------------------------------------------------------------------
 
+//ClipperConvert: converts IntPoint to and from DoublePoint based on "scaling_factor"
 class ClipperConvert
 {
 private:
   const double scale;
 public:
-IntPoint operator()(const DoublePoint& v);
-void ToIntPoints(const std::vector<DoublePoint>& dps, std::vector<IntPoint>& ips);
-DoublePoint operator()(const IntPoint& v);
-
-void ToDoublePoints(const std::vector<IntPoint>& ips, std::vector<DoublePoint>& dps);
-ClipperConvert(const int scaling_factor): scale((double)scaling_factor){}
+  IntPoint operator()(const DoublePoint& v);
+  void ToIntPoints(const std::vector<DoublePoint>& dps, std::vector<IntPoint>& ips);
+  DoublePoint operator()(const IntPoint& v);
+  void ToDoublePoints(const std::vector<IntPoint>& ips, std::vector<DoublePoint>& dps);
+  ClipperConvert(const double scaling_factor);
 };
 
 
 #ifdef use_xyz
-typedef void (*ZFillFunc)(long64 z1, long64 z2, IntPoint& pt);
+typedef void (*TZFillCallback)(cInt z1, cInt z2, IntPoint& pt);
 #endif
 
 class PolyNode;
@@ -170,18 +170,23 @@ private:
     friend class Clipper; //to access AllNodes
 };
 
-enum InitOptions {ioReverseSolution = 1, ioStrictlySimple = 2, ioPreserveColinear = 4};
+enum InitOptions {ioReverseSolution = 1, ioStrictlySimple = 2, ioPreserveCollinear = 4};
 enum JoinType {jtSquare, jtRound, jtMiter};
 enum EndType {etClosed, etButt, etSquare, etRound};
 
 bool Orientation(const Path &poly);
 double Area(const Path &poly);
 
-void OffsetPolygons(const Paths &in_polys, Paths &out_polys,
-  double delta, JoinType jointype = jtSquare, double limit = 0, bool autoFix = true);
+#ifdef use_deprecated
+  void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
+    double delta, JoinType jointype = jtSquare, double limit = 0, bool autoFix = true);
+  void PolyTreeToPolygons(const PolyTree& polytree, Paths& paths);
+  void ReversePolygon(Path& p);
+  void ReversePolygons(Paths& p);
+#endif
 
-void OffsetPolyLines(const Paths &in_lines, Paths &out_lines,
-  double delta, JoinType jointype = jtSquare, EndType endtype = etSquare, double limit = 0, bool autoFix = true);
+void OffsetPaths(const Paths &in_polys, Paths &out_polys,
+  double delta, JoinType jointype, EndType endtype, double limit = 0);
 
 void SimplifyPolygon(const Path &in_poly, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
 void SimplifyPolygons(const Paths &in_polys, Paths &out_polys, PolyFillType fillType = pftEvenOdd);
@@ -190,12 +195,14 @@ void SimplifyPolygons(Paths &polys, PolyFillType fillType = pftEvenOdd);
 void CleanPolygon(const Path& in_poly, Path& out_poly, double distance = 1.415);
 void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance = 1.415);
 
-void PolyTreeToPolygons(const PolyTree& polytree, Paths& paths);
+void PolyTreeToPaths(const PolyTree& polytree, Paths& paths);
+void ClosedPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
+void OpenPathsFromPolyTree(PolyTree& polytree, Paths& paths);
 
-void ReversePolygon(Path& p);
-void ReversePolygons(Paths& p);
+void ReversePath(Path& p);
+void ReversePaths(Paths& p);
 
-struct IntRect { cInt Left; cInt Top; cInt Right; cInt Bottom; };
+struct IntRect { cInt left; cInt top; cInt right; cInt bottom; };
 
 //enums that are used internally ...
 enum EdgeSide { esLeft = 1, esRight = 2};
@@ -226,15 +233,15 @@ public:
   bool AddPath(const Path &pg, PolyType PolyTyp, bool Closed);
   bool AddPaths(const Paths &ppg, PolyType PolyTyp, bool Closed);
 
-  //OBSOLETE - USE AddPath OR AddPaths ////////////////////////
+#ifdef use_deprecated
   bool AddPolygon(const Path &pg, PolyType PolyTyp);
   bool AddPolygons(const Paths &ppg, PolyType PolyTyp);
-  /////////////////////////////////////////////////////////////
+#endif
 
   virtual void Clear();
   IntRect GetBounds();
-  bool PreserveColinear() {return m_PreserveColinear;};
-  void PreserveColinear(bool value) {m_PreserveColinear = value;};
+  bool PreserveCollinear() {return m_PreserveCollinear;};
+  void PreserveCollinear(bool value) {m_PreserveCollinear = value;};
 protected:
   void DisposeLocalMinimaList();
   TEdge* AddBoundsToLML(TEdge *e, bool IsClosed);
@@ -248,7 +255,7 @@ protected:
   LocalMinima      *m_MinimaList;
   bool              m_UseFullRange;
   EdgeList          m_edges;
-  bool             m_PreserveColinear;
+  bool             m_PreserveCollinear;
   bool             m_HasOpenPaths;
 };
 //------------------------------------------------------------------------------
@@ -273,7 +280,7 @@ public:
   void StrictlySimple(bool value) {m_StrictSimple = value;};
   //set the callback function for z value filling on intersections (otherwise Z is 0)
 #ifdef use_xyz
-  void ZFillFunction(ZFillFunc zFillFunc);
+  void ZFillFunction(TZFillCallback zFillFunc);
 #endif
 protected:
   void Reset();
@@ -294,7 +301,7 @@ private:
   bool             m_UsingPolyTree; 
   bool             m_StrictSimple;
 #ifdef use_xyz
-  ZFillFunc        m_ZFill; //custom callback 
+  TZFillCallback   m_ZFill; //custom callback 
 #endif
   void DisposeScanbeamList();
   void SetWindingCount(TEdge& edge);
