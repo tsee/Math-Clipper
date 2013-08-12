@@ -422,8 +422,22 @@ Z fill functions may be used.
 
 =head2 ZFT_BOTH_UINT32
 
+(This option is under development and may not be reliable for all uses.)
+
 The Z values of the two edges that intersect will be interpreted as
-32 bit unsigned integers, and both will be returned.
+32 bit unsigned integers (or 31 bits - see below), and both will be returned in the Z value of
+the intersection point. (Obviously this requires Perl's integers to be
+64 bits.) The Z value of the edge going into the intersection
+Will be in the top 32 bits, and the Z value of the edge coming out of the
+intersection will be in the low 32 bits. (In some cases these can end up
+switched.)
+
+The highest bit of the high 32 bits is used as a "passthrough" flag. Set it to
+1 to preserve the Z values of intersection points in result polygons that will
+be used again in subsequant clipping operations. (Otherwise the edge order
+in the high and low 32 bits might get switched.) This flag bit reduces the 
+upper limit for the Z value stored in the upper 32 bits to the 31 bit 
+unsigned integer maximim of 2,147,483,647.
 
 This could typically be used to identify the input edges that contribute 
 to the output intersection point, if the integers are indices into the 
