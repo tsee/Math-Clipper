@@ -307,19 +307,24 @@ nested polygons by assigning each one to its parent. The I<PolyTree> structure i
 arrayref looking like this one:
 
   [
-      { outer => [ ..points.. ], children => [] },
+      { outer => [ ..points.. ], children => [], open => 0 },
       {
          outer => [ ..points.. ],
          children => [
             { hole => [ ..points.. ], children => [] },
             { hole => [ ..points.. ], children => [] },
          ],
+         open => 0
       }
   ]
 
 Each item is a hashref which may contain either the I<contour> or the I<hole>
 key, containing the polygon points. It also contains a I<children> key containing
 an arrayref of hashrefs itself, and so on.
+
+If the point sequence represents an open path instead of a polygon, the "open"
+key will indicate this.
+
 The Clipper documentation reports that it's more computationally expensive to process 
 (roughly 5-10% slower), it should only be used when parent-child polygon relationships 
 are needed and not just polygon coordinates.
