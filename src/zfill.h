@@ -59,8 +59,8 @@ void zfill_both_uint32s(long64 z1, long64 z2, IntPoint& pt) {
 // correspond to edge order in the input and result by swaping the hi and low
 // values in these two cases:
 // (clip type is intersection or difference) xor (point.Y is a local extreme)
-// Seems like it would be better to do this at the time the Z fill coallback gets
-// called, but Angus said it's too complex, considering varius overlapping line
+// Seems like it would be better to do this at the time the Z fill callback gets
+// called, but Angus said it's too complex, considering various overlapping line
 // and result simplification steps. But it may be worth while looking into what
 // that would take.
 

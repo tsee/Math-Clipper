@@ -104,6 +104,7 @@ polynode2perl(const PolyNode& node)
     } else {
         (void)hv_stores( hv, "outer", (SV*)polygon2perl(aTHX_ node.Contour) );
     }
+    (void)hv_stores( hv, "open", newSViv(node.IsOpen() ? 1 : 0) );
     (void)hv_stores( hv, "children", (SV*)polynode_children_2_perl(node) );
     return (SV*)newRV_noinc((SV*)hv);
 }

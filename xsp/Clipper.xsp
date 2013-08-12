@@ -183,6 +183,24 @@ add_clip_polylines(self, polys)
     self->AddPaths(*polys, ptClip, false);
     delete polys;
 
+bool
+preserve_collinear(self, ...)
+    Clipper* self
+  CODE:
+    if (items > 1) { self->PreserveColinear(SvIV(ST(1)) == 0 ? false : true); }
+    RETVAL = self->PreserveColinear();
+  OUTPUT:
+    RETVAL
+
+bool
+strictly_simple(self, ...)
+    Clipper* self
+  CODE:
+    if (items > 1) { self->StrictlySimple(SvIV(ST(1)) == 0 ? false : true); }
+    RETVAL = self->StrictlySimple();
+  OUTPUT:
+    RETVAL
+
 double
 orientation(polygon)
     ClipperLib::Polygon* polygon
