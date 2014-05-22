@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Clipper.
 
+1.23  Thu May 22 20:30:00 2014
+
+  - Fix 5.20 compatibility: av_extend is now using
+    unsigned lengths.
+
 1.22  Sun May 19 17:14:00 2013
 
   - Fixed some memory leaks.
