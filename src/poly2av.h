@@ -9,7 +9,7 @@ polygon2perl(pTHX_ const ClipperLib::Polygon& poly)
   AV* av = newAV();
   AV* innerav;
   const unsigned int len = poly.size();
-  av_extend(av, len-1);
+  av_extend(av, len == 0 ? 0 : len-1);
   for (unsigned int i = 0; i < len; i++) {
     innerav = newAV();
     av_store(av, i, newRV_noinc((SV*)innerav));
@@ -38,7 +38,7 @@ polygons2perl(pTHX_ const ClipperLib::Polygons& poly)
   AV* av = newAV();
   SV* innerav;
   const unsigned int len = poly.size();
-  av_extend(av, len-1);
+  av_extend(av, len == 0 ? 0 : len-1);
   for (unsigned int i = 0; i < len; i++) {
     innerav = polygon2perl(aTHX_ poly[i]);
     av_store(av, i, innerav);
@@ -63,7 +63,7 @@ expolygons2perl(pTHX_ const ExPolygons& polys)
   AV* av = newAV();
   SV* innerav;
   const unsigned int len = polys.size();
-  av_extend(av, len-1);
+  av_extend(av, len == 0 ? 0 : len-1);
   for (unsigned int i = 0; i < len; i++) {
     innerav = expolygon2perl(aTHX_ polys[i]);
     av_store(av, i, innerav);
@@ -78,7 +78,7 @@ polynode_children_2_perl(const PolyNode& node)
 {
     AV* av = newAV();
     const unsigned int len = node.ChildCount();
-    av_extend(av, len-1);
+    av_extend(av, len == 0 ? 0 : len-1);
     for (int i = 0; i < len; ++i) {
         av_store(av, i, polynode2perl(*node.Childs[i]));
     }
