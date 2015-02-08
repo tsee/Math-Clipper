@@ -1,6 +1,6 @@
 Revision history for Perl extension Math::Clipper.
 
-1.23  Monday August 12 12:12:00 2013
+1.2x  Monday August 12 12:12:00 2013
 
   - New polylines_offset()
   - New strictly_simple()
@@ -9,6 +9,11 @@ Revision history for Perl extension Math::Clipper.
   - Open paths now supported as clip operation subjects.
   - Polynodes have "open" key to indicate open path vs. closed polygon.
   - Allow pass-through Z values for points (arbitrary integer data).
+
+1.23  Thu May 22 20:30:00 2014
+
+  - Fix 5.20 compatibility: av_extend is now using
+    unsigned lengths.
 
 1.22  Sun May 19 17:14:00 2013
 
