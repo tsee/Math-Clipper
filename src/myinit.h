@@ -7,9 +7,12 @@ using namespace ClipperLib;
 
 //-----------------------------------------------------------
 // legacy code from Clipper documentation
+
+typedef signed long long long64;
+
 struct ExPolygon {
-  ClipperLib::Polygon outer;
-  ClipperLib::Polygons holes;
+  ClipperLib::Path outer;
+  ClipperLib::Paths holes;
 };
  
 typedef std::vector< ExPolygon > ExPolygons;
@@ -40,7 +43,7 @@ void PolyTreeToExPolygons(ClipperLib::PolyTree& polytree, ExPolygons& expolygons
 #include "poly2av.h"
 #include "offset.h"
 
-enum ZFillType { zftNone, zftMax, zftMin, zftMean, zftBothUInt32 };
+enum ZFillType { zftNone, zftMax, zftMin, zftBothMax, zftBothMin, zftInterpolateMean, zftBothUInt32, zftAllUInt16, zftBothUInt31Flags };
 #ifdef use_xyz
 #include "zfill.h"
 #define CLIPPER_HAS_Z 1

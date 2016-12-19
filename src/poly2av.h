@@ -4,7 +4,7 @@
 #include "myinit.h"
 
 SV*
-polygon2perl(pTHX_ const ClipperLib::Polygon& poly)
+polygon2perl(pTHX_ const ClipperLib::Path& poly)
 {
   AV* av = newAV();
   AV* innerav;
@@ -43,7 +43,7 @@ polygon2perl(pTHX_ const ClipperLib::Polygon& poly)
 
 
 SV*
-polygons2perl(pTHX_ const ClipperLib::Polygons& poly)
+polygons2perl(pTHX_ const ClipperLib::Paths& poly)
 {
   AV* av = newAV();
   SV* innerav;
@@ -117,11 +117,11 @@ polytree2perl(pTHX_ const PolyTree& polytree)
 
 
 
-ClipperLib::Polygon*
+ClipperLib::Path*
 perl2polygon(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  ClipperLib::Polygon* retval = new ClipperLib::Polygon(len);
+  ClipperLib::Path* retval = new ClipperLib::Path(len);
   SV** elem;
   AV* innerav;
   for (unsigned int i = 0; i < len; i++) {
@@ -163,11 +163,11 @@ perl2polygon(pTHX_ AV* theAv)
 }
 
 
-ClipperLib::Polygons*
+ClipperLib::Paths*
 perl2polygons(pTHX_ AV* theAv)
 {
   const unsigned int len = av_len(theAv)+1;
-  ClipperLib::Polygons* retval = new ClipperLib::Polygons(len);
+  ClipperLib::Paths* retval = new ClipperLib::Paths(len);
   SV** elem;
   AV* innerav;
   for (unsigned int i = 0; i < len; i++) {
@@ -180,7 +180,7 @@ perl2polygons(pTHX_ AV* theAv)
       return NULL;
     }
     innerav = (AV*)SvRV(*elem);
-    ClipperLib::Polygon* tmp = perl2polygon(aTHX_ innerav);
+    ClipperLib::Path* tmp = perl2polygon(aTHX_ innerav);
     if (tmp == NULL) {
       delete retval;
       return NULL;
@@ -216,14 +216,14 @@ perl2expolygon(pTHX_ HV* theHv)
   AV_CHECK(holesav, theHv, "holes");
 
   ExPolygon* retval = new ExPolygon();
-  ClipperLib::Polygon* tmp = perl2polygon(aTHX_ outerav);
+  ClipperLib::Path* tmp = perl2polygon(aTHX_ outerav);
   if (!tmp) {
     delete retval;
     return NULL;
   }
   retval->outer = *tmp;
 
-  ClipperLib::Polygons* tmps = perl2polygons(aTHX_ holesav);
+  ClipperLib::Paths* tmps = perl2polygons(aTHX_ holesav);
   if (!tmps) {
     delete retval;
     return NULL;

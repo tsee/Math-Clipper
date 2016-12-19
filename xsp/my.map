@@ -7,10 +7,10 @@ PolyFillType		T_UV
 JoinType		T_UV
 ZFillType		T_UV
 
-ClipperLib::Polygon			T_VECTOR_POINT
-ClipperLib::Polygon*		T_VECTOR_POINT_PTR
-ClipperLib::Polygons		T_VECTOR_VECTOR_POINT
-ClipperLib::Polygons*		T_VECTOR_VECTOR_POINT_PTR
+ClipperLib::Path			T_VECTOR_POINT
+ClipperLib::Path*		T_VECTOR_POINT_PTR
+ClipperLib::Paths		T_VECTOR_VECTOR_POINT
+ClipperLib::Paths*		T_VECTOR_VECTOR_POINT_PTR
 ClipperLib::PolyTree*		T_POLYTREE_PTR
 ExPolygon		T_EXPOLY
 ExPolygon*		T_EXPOLY_PTR

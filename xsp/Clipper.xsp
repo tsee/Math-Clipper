@@ -24,15 +24,20 @@ _constant()
     JT_MITER = jtMiter
     JT_ROUND = jtRound
     JT_SQUARE = jtSquare
-    ET_CLOSED = etClosed
-    ET_BUTT = etButt
-    ET_SQUARE = etSquare
-    ET_ROUND = etRound
+    ET_CLOSED_POLYGON = etClosedPolygon
+    ET_CLOSED_LINE = etClosedLine
+    ET_OPEN_BUTT = etOpenButt
+    ET_OPEN_SQUARE = etOpenSquare
+    ET_OPEN_ROUND = etOpenRound
     ZFT_NONE = zftNone
     ZFT_MAX = zftMax
     ZFT_MIN = zftMin
-    ZFT_MEAN = zftMean
+    ZFT_BOTH_MAX = zftBothMax
+    ZFT_BOTH_MIN = zftBothMin
+    ZFT_INTERPOLATE_MEAN = zftInterpolateMean
     ZFT_BOTH_UINT32 = zftBothUInt32
+    ZFT_ALL_UINT16 = zftAllUInt16
+    ZFT_BOTH_UINT31_FLAGS = zftBothUInt31Flags
   CODE:
     RETVAL = ix;
   OUTPUT: RETVAL
@@ -46,7 +51,7 @@ class Clipper {
 
 %{
 
-ClipperLib::Polygons*
+ClipperLib::Paths*
 execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zfill = zftNone)
     Clipper* THIS
     ClipType clipType
@@ -54,7 +59,7 @@ execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd, zf
     PolyFillType clipFillType
     ZFillType zfill
   CODE:
-    RETVAL = new ClipperLib::Polygons();
+    RETVAL = new ClipperLib::Paths();
 #ifdef use_xyz
     set_zfill_callback(*THIS, zfill);
 #endif
@@ -122,7 +127,7 @@ pt_execute(THIS, clipType, subjFillType = pftEvenOdd, clipFillType = pftEvenOdd,
 void
 add_subject_polygon(self, poly)
     Clipper* self
-    ClipperLib::Polygon* poly
+    ClipperLib::Path* poly
   PPCODE:
     self->AddPath(*poly, ptSubject, true);
     delete poly;
@@ -130,7 +135,7 @@ add_subject_polygon(self, poly)
 void
 add_clip_polygon(self, poly)
     Clipper* self
-    ClipperLib::Polygon* poly
+    ClipperLib::Path* poly
   PPCODE:
     self->AddPath(*poly, ptClip, true);
     delete poly;
@@ -138,7 +143,7 @@ add_clip_polygon(self, poly)
 void
 add_subject_polygons(self, polys)
     Clipper* self
-    ClipperLib::Polygons* polys
+    ClipperLib::Paths* polys
   PPCODE:
     self->AddPaths(*polys, ptSubject, true);
     delete polys;
@@ -146,7 +151,7 @@ add_subject_polygons(self, polys)
 void
 add_clip_polygons(self, polys)
     Clipper* self
-    ClipperLib::Polygons* polys
+    ClipperLib::Paths* polys
   PPCODE:
     self->AddPaths(*polys, ptClip, true);
     delete polys;
@@ -154,7 +159,7 @@ add_clip_polygons(self, polys)
 void
 add_subject_polyline(self, poly)
     Clipper* self
-    ClipperLib::Polygon* poly
+    ClipperLib::Path* poly
   PPCODE:
     self->AddPath(*poly, ptSubject, false);
     delete poly;
@@ -162,7 +167,7 @@ add_subject_polyline(self, poly)
 void
 add_clip_polyline(self, poly)
     Clipper* self
-    ClipperLib::Polygon* poly
+    ClipperLib::Path* poly
   PPCODE:
     self->AddPath(*poly, ptClip, false);
     delete poly;
@@ -170,7 +175,7 @@ add_clip_polyline(self, poly)
 void
 add_subject_polylines(self, polys)
     Clipper* self
-    ClipperLib::Polygons* polys
+    ClipperLib::Paths* polys
   PPCODE:
     self->AddPaths(*polys, ptSubject, false);
     delete polys;
@@ -178,7 +183,7 @@ add_subject_polylines(self, polys)
 void
 add_clip_polylines(self, polys)
     Clipper* self
-    ClipperLib::Polygons* polys
+    ClipperLib::Paths* polys
   PPCODE:
     self->AddPaths(*polys, ptClip, false);
     delete polys;
@@ -203,7 +208,7 @@ strictly_simple(self, ...)
 
 double
 orientation(polygon)
-    ClipperLib::Polygon* polygon
+    ClipperLib::Path* polygon
   CODE:
     RETVAL = ClipperLib::Orientation(*polygon);
     delete polygon;
@@ -211,58 +216,74 @@ orientation(polygon)
 
 double
 area(polygon)
-    ClipperLib::Polygon* polygon
+    ClipperLib::Path* polygon
   CODE:
     RETVAL = ClipperLib::Area(*polygon);
     delete polygon;
   OUTPUT: RETVAL
 
-ClipperLib::Polygons*
-_offset(polygons, delta, jointype, MiterLimit)
-    ClipperLib::Polygons* polygons
+ClipperLib::Paths*
+_offset(polygons, delta, jointype=jtMiter, MiterLimit, endtype=etClosedPolygon)
+    ClipperLib::Paths* polygons
     const float delta
     JoinType jointype
     const double MiterLimit
+    EndType endtype
   CODE:
-    RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
+    RETVAL = new ClipperLib::Paths();
+    //ClipperLib::OffsetPolygons(*polygons, *RETVAL, delta, jointype, MiterLimit);
+    ClipperLib::ClipperOffset co;
+    co.MiterLimit = MiterLimit;
+    co.AddPaths(*polygons, jointype, endtype);
+    co.Execute(*RETVAL, delta);
+    co.Clear();
     delete polygons;
   OUTPUT:
     RETVAL
 
-ClipperLib::Polygons*
-int_offset(polygons, delta, scale, jointype, MiterLimit)
-    ClipperLib::Polygons* polygons
+ClipperLib::Paths*
+int_offset(polygons, delta, scale, jointype, MiterLimit, endtype = etClosedPolygon)
+    ClipperLib::Paths* polygons
     const float delta
     const double scale
     JoinType jointype
     const double MiterLimit
+    EndType endtype
   CODE:
-    RETVAL = _int_offset(polygons, delta, scale, jointype, MiterLimit);
+    RETVAL = _int_offset(polygons, delta, scale, jointype, MiterLimit, endtype);
     delete polygons;
   OUTPUT:
     RETVAL
 
-ClipperLib::Polygons*
-int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
-    ClipperLib::Polygons* polygons
+ClipperLib::Paths*
+int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit, endtype=etClosedPolygon)
+    ClipperLib::Paths* polygons
     const float delta1
     const float delta2
     const double scale
     JoinType jointype
     const double MiterLimit
+    EndType endtype
   CODE:
     // scale
     _scale_polygons(polygons, scale);
     
     // perform first offset
-    ClipperLib::Polygons* offset1 = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    ClipperLib::Paths* offset1 = new ClipperLib::Paths();
+    //ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    ClipperLib::ClipperOffset co;
+    co.MiterLimit = MiterLimit;
+    co.AddPaths(*polygons, jointype, endtype);
+    co.Execute(*offset1, (delta1*scale));
+    co.Clear();
     
     // perform second offset
-    RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*offset1, *RETVAL, (delta2*scale), jointype, MiterLimit);
-    
+    RETVAL = new ClipperLib::Paths();
+    //ClipperLib::OffsetPolygons(*offset1, *RETVAL, (delta2*scale), jointype, MiterLimit);
+    co.AddPaths(*offset1, jointype, endtype);
+    co.Execute(*RETVAL, delta2);
+    co.Clear();
+
     // unscale
     _scale_polygons(RETVAL, 1/scale);
     
@@ -273,17 +294,18 @@ int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     RETVAL
 
 ExPolygons*
-ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
-    ClipperLib::Polygons* polygons
+ex_int_offset(polygons, delta, scale, jointype, MiterLimit, endtype = etClosedPolygon)
+    ClipperLib::Paths* polygons
     const float delta
     const double scale
     JoinType jointype
     const double MiterLimit
+    EndType endtype
   CODE:
     Clipper clpr;
     clpr.Clear();
-    ClipperLib::Polygons* offset = _int_offset(polygons, delta, scale, jointype, MiterLimit);
-    clpr.AddPolygons(*offset, ptSubject);
+    ClipperLib::Paths* offset = _int_offset(polygons, delta, scale, jointype, MiterLimit, endtype);
+    clpr.AddPaths(*offset, ptSubject, true);
     PolyTree* polytree = new ClipperLib::PolyTree();
     clpr.Execute(ctUnion, *polytree, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
     
@@ -298,24 +320,33 @@ ex_int_offset(polygons, delta, scale, jointype, MiterLimit)
     RETVAL
 
 ExPolygons*
-ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
-    ClipperLib::Polygons* polygons
+ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit, endtype = etClosedPolygon)
+    ClipperLib::Paths* polygons
     const float delta1
     const float delta2
     const double scale
     JoinType jointype
     const double MiterLimit
+    EndType endtype
   CODE:
     // scale
     _scale_polygons(polygons, scale);
     
     // perform first offset
-    ClipperLib::Polygons* offset1 = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    ClipperLib::Paths* offset1 = new ClipperLib::Paths();
+    //ClipperLib::OffsetPolygons(*polygons, *offset1, (delta1*scale), jointype, MiterLimit);
+    ClipperLib::ClipperOffset co;
+    co.MiterLimit = MiterLimit;
+    co.AddPaths(*polygons, jointype, endtype);
+    co.Execute(*offset1, (delta1*scale));
+    co.Clear();
     
     // perform second offset
-    ClipperLib::Polygons* offset2 = new ClipperLib::Polygons();
-    ClipperLib::OffsetPolygons(*offset1, *offset2, (delta2*scale), jointype, MiterLimit);
+    ClipperLib::Paths* offset2 = new ClipperLib::Paths();
+    //ClipperLib::OffsetPolygons(*offset1, *offset2, (delta2*scale), jointype, MiterLimit);
+    co.AddPaths(*offset1, jointype, endtype);
+    co.Execute(*offset2, (delta2*scale));
+    co.Clear();
     
     // unscale
     _scale_polygons(offset2, 1/scale);
@@ -323,7 +354,7 @@ ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
     // perform UNION
     Clipper clpr;
     clpr.Clear();
-    clpr.AddPolygons(*offset2, ptSubject);
+    clpr.AddPaths(*offset2, ptSubject, true);
     PolyTree* polytree = new ClipperLib::PolyTree();
     clpr.Execute(ctUnion, *polytree, pftEvenOdd, pftEvenOdd);  // offset results work with both EvenOdd and NonZero
     
@@ -339,30 +370,35 @@ ex_int_offset2(polygons, delta1, delta2, scale, jointype, MiterLimit)
   OUTPUT:
     RETVAL
 
-ClipperLib::Polygons*
-polylines_offset(polylines, delta, jointype, endtype, limit)
-    ClipperLib::Polygons* polylines
+ClipperLib::Paths*
+polylines_offset(polylines, delta, jointype, endtype = etOpenButt, limit)
+    ClipperLib::Paths* polylines
     const float delta
     JoinType jointype
     EndType endtype
     const double limit
   CODE:
-    RETVAL = new ClipperLib::Polygons();
-    ClipperLib::OffsetPaths(*polylines, *RETVAL, delta, jointype, endtype, limit);
+    RETVAL = new ClipperLib::Paths();
+    //ClipperLib::OffsetPaths(*polylines, *RETVAL, delta, jointype, endtype, limit);
+    ClipperLib::ClipperOffset co;
+    co.MiterLimit = limit;
+    co.AddPaths(*polylines, jointype, endtype);
+    co.Execute(*RETVAL, delta);
+    co.Clear();
     delete polylines;
   OUTPUT:
     RETVAL
 
 # singular version simplify_polygon() removed in 6.0.0
-ClipperLib::Polygons*
+ClipperLib::Paths*
 simplify_polygon(polygon, fillType)
-    ClipperLib::Polygon* polygon
+    ClipperLib::Path* polygon
     PolyFillType fillType
   PREINIT:
-    ClipperLib::Polygons* polygons;
+    ClipperLib::Paths* polygons;
   CODE:
-    RETVAL = new ClipperLib::Polygons();
-    polygons = new ClipperLib::Polygons();
+    RETVAL = new ClipperLib::Paths();
+    polygons = new ClipperLib::Paths();
     polygons->push_back(*polygon);
     ClipperLib::SimplifyPolygons(*polygons, *RETVAL, fillType);
     delete polygon;
@@ -370,12 +406,12 @@ simplify_polygon(polygon, fillType)
   OUTPUT:
     RETVAL
 
-ClipperLib::Polygons*
+ClipperLib::Paths*
 simplify_polygons(polygons, fillType)
-    ClipperLib::Polygons* polygons
+    ClipperLib::Paths* polygons
     PolyFillType fillType
   CODE:
-    RETVAL = new ClipperLib::Polygons();
+    RETVAL = new ClipperLib::Paths();
     ClipperLib::SimplifyPolygons(*polygons, *RETVAL, fillType);
     delete polygons;
   OUTPUT:

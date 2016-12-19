@@ -24,7 +24,9 @@ our %EXPORT_TAGS = (
     polyfilltypes => [qw/PFT_EVENODD PFT_NONZERO PFT_POSITIVE PFT_NEGATIVE/],
     jointypes     => [qw/JT_MITER JT_ROUND JT_SQUARE/],
     endtypes     => [qw/ET_SQUARE ET_ROUND ET_BUTT ET_CLOSED/],
-    zfilltypes     => [qw/ZFT_NONE ZFT_MAX ZFT_MIN ZFT_MEAN ZFT_BOTH_UINT32/],
+    zfilltypes     => [qw/ZFT_NONE ZFT_MAX ZFT_MIN ZFT_BOTH_MAX ZFT_BOTH_MIN
+                       ZFT_INTERPOLATE_MEAN ZFT_BOTH_UINT32 ZFT_ALL_UINT16
+                       ZFT_BOTH_UINT31_FLAGS/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
                     simplify_polygon simplify_polygons int_offset ex_int_offset ex_int_offset2/],
 );
