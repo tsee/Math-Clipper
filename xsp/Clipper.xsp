@@ -37,7 +37,7 @@ _constant()
     ZFT_INTERPOLATE_MEAN = zftInterpolateMean
     ZFT_BOTH_UINT32 = zftBothUInt32
     ZFT_ALL_UINT16 = zftAllUInt16
-    ZFT_BOTH_UINT31_FLAGS = zftBothUInt31Flags
+    ZFT_BOTH_MAX_FLAGS = zftBothMaxFlags
   CODE:
     RETVAL = ix;
   OUTPUT: RETVAL

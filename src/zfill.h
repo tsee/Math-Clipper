@@ -147,27 +147,36 @@ void zfill_both_uint32s(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPo
   pt.Z = (hi + lo);
 }
 
-void zfill_both_uint31s_and_flags(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top, IntPoint& pt) { 
+void zfill_both_max_and_flags(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top, IntPoint& pt) { 
 
-  // Preserve the Z values of each bottom point,
-  // and a one-bit flag indicating whether the 
-  // associated top point Z is greater-than-or-equal
-  // or less than the bottom Z value.
-
-  // If the Z values are indeces into an array holding input point data, 
-  // then the top points here are likely one index up or down from the index
-  // for the bottom points. So we only need a hint which way to look to.
+  // Preserve the highest Z value of each edge's two points,
+  // and a one-bit flag indicating whether that Z value came from the
+  // bottom or top point of the edge.
   
-  // This lets us have 31 bit Z values - up to 2,147,483,647.
+  // If the Z values are indeces into an array holding input point data, 
+  // then having the greater index available in results implies the other
+  // point involved in the intersection is the one with index Z - 1.
+  // So you get two for one, as long as intersections were fairly simple.
+  // The flag to indicate which end of each edge had that higher Z index
+  // should help indicate the four end points relative positions to each other
+  // without having to recalculate from their coordinates.
+  
+  // This lets us have two 31 bit Z values - up to 2,147,483,647.
 
-  if (e1bot.Z > 0xFFFF || e2bot.Z > 0xFFFF) {
+
+  bool  e1hiisleft = e1bot.Z  > e1top.Z;
+  cUInt e1hiz      = e1hiisleft ? e1bot.Z : e1top.Z;
+  bool  e2hiisleft = e2top.Z  > e2bot.Z;
+  cUInt e2hiz      = e2hiisleft ? e2top.Z : e2bot.Z;
+
+  if (e1hiz > 0x7FFFFFFF || e2hiz > 0x7FFFFFFF) {
     throw clipperException("Z value outside allowed 31 bit range for z fill callback");
   }
 
-  cUInt hi = (cUInt) (e1bot.Z & 0x7FFFFFFF);
-  cUInt lo = (cUInt) (e2bot.Z & 0x7FFFFFFF);
-  cUInt hiflag = (cUInt) (e1top.Z >= e1bot.Z ? 1 : 0);
-  cUInt loflag = (cUInt) (e2top.Z >= e2bot.Z ? 1 : 0);
+  cUInt hi = (cUInt) (e1hiz & 0x7FFFFFFF);
+  cUInt lo = (cUInt) (e2hiz & 0x7FFFFFFF);
+  cUInt hiflag = (cUInt) (e1hiisleft ? 1 : 0);
+  cUInt loflag = (cUInt) (e2hiisleft ? 1 : 0);
 
   hiflag <<= 63;
   hi     <<= 32;
@@ -408,7 +417,7 @@ void set_zfill_callback(Clipper& THIS, ZFillType zft) {
         case zftInterpolateMean : THIS.ZFillFunction(&zfill_average_interpolate_z); break;
         case zftBothUInt32 : THIS.ZFillFunction(&zfill_both_uint32s); break;
         case zftAllUInt16 : THIS.ZFillFunction(&zfill_all_uint16s); break;
-        case zftBothUInt31Flags : THIS.ZFillFunction(&zfill_both_uint31s_and_flags); break;
+        case zftBothMaxFlags : THIS.ZFillFunction(&zfill_both_max_and_flags); break;
         default      : THIS.ZFillFunction(0);
     }
 }

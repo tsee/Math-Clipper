@@ -26,7 +26,7 @@ our %EXPORT_TAGS = (
     endtypes     => [qw/ET_SQUARE ET_ROUND ET_BUTT ET_CLOSED/],
     zfilltypes     => [qw/ZFT_NONE ZFT_MAX ZFT_MIN ZFT_BOTH_MAX ZFT_BOTH_MIN
                        ZFT_INTERPOLATE_MEAN ZFT_BOTH_UINT32 ZFT_ALL_UINT16
-                       ZFT_BOTH_UINT31_FLAGS/],
+                       ZFT_BOTH_MAX_FLAGS/],
     utilities       => [qw/area offset is_counter_clockwise orientation integerize_coordinate_sets unscale_coordinate_sets
                     simplify_polygon simplify_polygons int_offset ex_int_offset ex_int_offset2/],
 );
