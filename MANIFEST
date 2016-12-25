@@ -4,6 +4,8 @@ lib/Math/Clipper.pm
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
+src/patch_for_clipper6.4.1_r498.diff
+src/clipper.cpp.original
 src/clipper.cpp
 src/clipper.hpp
 src/myinit.h
@@ -26,6 +28,7 @@ t/012_polytree.t
 t/013_withz.t
 t/014_withzfill.t
 t/015_withzfillpostfix.t
+t/016_withzfillMaxAndFlags.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
