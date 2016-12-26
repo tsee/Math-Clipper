@@ -27,8 +27,7 @@ t/011Int128Comparison.t
 t/012_polytree.t
 t/013_withz.t
 t/014_withzfill.t
-t/015_withzfillpostfix.t
-t/016_withzfillMaxAndFlags.t
+t/015_zfillParamConsistency.t
 xsp/Clipper.xsp
 xsp/my.map
 xsp/types.xspt
