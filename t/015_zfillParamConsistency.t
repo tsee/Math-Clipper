@@ -334,9 +334,9 @@ sub docaseset {
 sub rot_case {
     my ($subjects,$clips,$intersections,$rot) = @_;
     return [
-        [ map [map [rotate2d([0,0],[$_->[0],$_->[1]], $rot/4), $_->[2]], @$_], @$subjects ],
-        [ map [map [rotate2d([0,0],[$_->[0],$_->[1]], $rot/4), $_->[2]], @$_], @$clips    ],
-        [ map [[rotate2d([0,0],[$_->[0]->[0],$_->[0]->[1]], $rot/4)], @{$_}[1 .. $#{$_}]], @$intersections],
+        [ map [map [rotate2d([0,0],[$_->[0],$_->[1]], $rot), $_->[2]], @$_], @$subjects ],
+        [ map [map [rotate2d([0,0],[$_->[0],$_->[1]], $rot), $_->[2]], @$_], @$clips    ],
+        [ map [[rotate2d([0,0],[$_->[0]->[0],$_->[0]->[1]], $rot)], @{$_}[1 .. $#{$_}]], @$intersections],
         $rot*(180/$pi) .' deg' # to append to case label
     ];
 }
