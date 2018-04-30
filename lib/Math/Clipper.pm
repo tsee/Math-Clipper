@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Config;
+use POSIX qw(floor);
 
 use Exporter();
 our $VERSION;
@@ -151,7 +152,9 @@ sub integerize_coordinate_sets {
         foreach my $vector (@{$set}) {
             for (my $ci=0;$ci<$coord_count;$ci++) {
                 $vector->[$ci] *= $scale_vector[$ci];
-                if (abs($vector->[$ci] < 1)) {$vector->[$ci] = sprintf("%.1f",$vector->[$ci]/10)*10;}
+                if    (abs($vector->[$ci]) < 0.5) { $vector->[$ci] = 0; }
+                elsif (abs($vector->[$ci]) < 1) { $vector->[$ci] = $vector->[$ci] < 0 ? -1:1; }
+                $vector->[$ci] = floor($vector->[$ci]);
                 }
             }
         }
