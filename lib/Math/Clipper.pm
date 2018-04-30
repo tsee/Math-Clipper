@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Config;
-use POSIX qw(floor);
 
 use Exporter();
 our $VERSION;
@@ -154,7 +153,7 @@ sub integerize_coordinate_sets {
                 $vector->[$ci] *= $scale_vector[$ci];
                 if    (abs($vector->[$ci]) < 0.5) { $vector->[$ci] = 0; }
                 elsif (abs($vector->[$ci]) < 1) { $vector->[$ci] = $vector->[$ci] < 0 ? -1:1; }
-                $vector->[$ci] = floor($vector->[$ci]);
+                $vector->[$ci] = _floor($vector->[$ci]);
                 }
             }
         }
