@@ -130,6 +130,10 @@ sub integerize_coordinate_sets {
             $scale_vector[$ci]=10**(-$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 2));
 
         }
+
+        # brings behavior of FreeBSD + clang systems into harmony with others
+        $scale_vector[$ci] = 0.0 + sprintf("%.0f",$scale_vector[$ci]);
+
     }
 
     # If the "constrain" option is set false,
