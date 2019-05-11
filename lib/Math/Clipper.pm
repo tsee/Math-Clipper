@@ -117,7 +117,18 @@ sub integerize_coordinate_sets {
         # There's never any question of how much precision the user wants -
         # we just always give as much as possible, within the integer limit in effect (53 bit or 64 bit)
 
-        $scale_vector[$ci]=10**(-$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 1));
+        $scale_vector[$ci] = 1;
+        my $power = -$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 1);
+
+        # We explicitly calculate the equivalent to 1**$power because
+        # the results of the system's pow() function underlying
+        # Perl's ** operator are sometimes inconsistent between
+        # BSD/clang and other systems.
+
+        for (my $pi = 0; $pi < abs($power); $pi++) {
+            if    ($power > 0) { $scale_vector[$ci] *= 10; }
+            elsif ($power < 0) { $scale_vector[$ci] /= 10; }
+        }
 
         if ($maxc * $scale_vector[$ci] > $intspecs{$opts{bits}}->{maxint}) {
             # Both 53 bit and 64 bit integers
@@ -127,7 +138,7 @@ sub integerize_coordinate_sets {
             # zone just beyond the integer max, we'll only
             # scale up to 15 or 18 digit integers instead.
 
-            $scale_vector[$ci]=10**(-$max_exp + ($intspecs{$opts{bits}}->{maxdigits} - 2));
+            $scale_vector[$ci] /= 10;
 
         }
 
