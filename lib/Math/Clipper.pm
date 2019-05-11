@@ -89,10 +89,10 @@ sub integerize_coordinate_sets {
     # assume all coordinate vectors (points) have same number of coordinates; get that count from first one
     my $coord_count=scalar(@{$_[0]->[0]});
 
-    # return this with scaled data, so user can "unscale" Clipper results
+    # return this array of each column's calculated scale factor, so users can "unscale" Clipper results
     my @scale_vector;
 
-    # deal with each coordinate "column" (eg. x column, y column, ... possibly more)
+    # deal with each coordinate column (eg. x column, y column, ... possibly more)
     for (my $ci=0;$ci<$coord_count;$ci++) {
         my $maxc=$_[0]->[0]->[$ci];
         my $max_exp;
@@ -101,19 +101,19 @@ sub integerize_coordinate_sets {
         foreach my $set (@_) {
             # for each "point"
             foreach my $vector (@{$set}) {
-                # looking for the maximum magnitude
+                # possibly update the the maximum magnitude seen in the column
                 if ($maxc<abs($vector->[$ci]) + $opts{margin}) {$maxc=abs($vector->[$ci]) + $opts{margin};}
-                # looking for the maximum exponent, when coords are in scientific notation
+                # look for the maximum exponent, when coords are in scientific notation
                 if (sprintf("%.20e",$vector->[$ci] + ($vector->[$ci]<0?-1:1)*$opts{margin}) =~ /[eE]([+-])0*(\d+)$/) {
                     my $exp1 = eval($1.$2);
-                    if (defined $vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1} 
+                    if (defined $vector->[$ci] && (!defined($max_exp) || $max_exp<$exp1)) {$max_exp=$exp1;}
                 }
-                else {croak "some coordinate didn't look like a number: ",$vector->[$ci]}
+                else {croak "some coordinate didn't look like a number: ",$vector->[$ci];}
             }
         }
 
         # Set scale for this coordinate column to the largest value that will convert the
-        # larges coordinate in the set to near the top of the available integer range.
+        # largest coordinate in the set to near the top of the available integer range.
         # There's never any question of how much precision the user wants -
         # we just always give as much as possible, within the integer limit in effect (53 bit or 64 bit)
 
@@ -139,7 +139,6 @@ sub integerize_coordinate_sets {
             # scale up to 15 or 18 digit integers instead.
 
             $scale_vector[$ci] /= 10;
-
         }
 
         # brings behavior of FreeBSD + clang systems into harmony with others
