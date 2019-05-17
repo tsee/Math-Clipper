@@ -1,6 +1,9 @@
 #ifndef __clipper_myinit_h_
 #define __clipper_myinit_h_
 
+#undef dNOOP
+#define dNOOP struct Perl___notused_struct
+
 #include "clipper.hpp"
 
 using namespace ClipperLib;
